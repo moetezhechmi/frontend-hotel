@@ -163,7 +163,7 @@ const ClientHome = () => {
         const syncNotifications = async () => {
             if (!cid || isNetworkOffline) return;
             try {
-                const res = await fetch(`http://${window.location.hostname}:3001/api/notifications?clientId=${cid}`);
+                const res = await fetch(`${API_BASE_URL}/api/notifications?clientId=${cid}`);
                 const data = await res.json();
                 if (data.success) {
                     const dbLastNotifs = data.notifications.map(n => ({
@@ -186,7 +186,7 @@ const ClientHome = () => {
         };
 
         // Socket setup
-        const socket = io(`http://${window.location.hostname}:3001`);
+        const socket = io(`${API_BASE_URL}`);
         
         socket.on('connect', () => {
             setIsNetworkOffline(false);
@@ -293,7 +293,7 @@ const ClientHome = () => {
 
 
 
-            const res = await fetch(`http://${window.location.hostname}:3001/api/commandes`, {
+            const res = await fetch(`${API_BASE_URL}/api/commandes`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -327,7 +327,7 @@ const ClientHome = () => {
 
 
         try {
-            const res = await fetch(`http://${window.location.hostname}:3001/api/demandes`, {
+            const res = await fetch(`${API_BASE_URL}/api/demandes`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -359,7 +359,7 @@ const ClientHome = () => {
 
 
         try {
-            const res = await fetch(`http://${window.location.hostname}:3001/api/demandes`, {
+            const res = await fetch(`${API_BASE_URL}/api/demandes`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
