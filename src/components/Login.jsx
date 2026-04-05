@@ -91,6 +91,7 @@ const Login = () => {
                 // Store client info / session simply in localStorage for this prototype
                 localStorage.setItem('clientId', response.data.client_id);
                 localStorage.setItem('chambre', response.data.chambre);
+                localStorage.removeItem('offlineMode'); // Clear offline mode if they just logged in!
                 navigate('/client/services');
             }
         } catch (err) {
