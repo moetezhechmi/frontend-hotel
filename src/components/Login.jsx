@@ -4,7 +4,7 @@ import axios from 'axios';
 import { KeyRound, DoorClosed, ArrowRight, Globe, Check, CloudOff, Wifi, Info } from 'lucide-react';
 import { translations } from '../translations';
 import { prefetchHotelData } from '../utils/sync';
-import API_BASE_URL from '../config';
+import API_BASE_URL, { VAPID_PUBLIC_KEY } from '../config';
 
 
 const Login = () => {
@@ -92,6 +92,31 @@ const Login = () => {
                 localStorage.setItem('clientId', response.data.client_id);
                 localStorage.setItem('chambre', response.data.chambre);
                 localStorage.removeItem('offlineMode'); // Clear offline mode if they just logged in!
+                
+                // --- Notification Permission & Subscription ---
+                if ('serviceWorker' in navigator && 'PushManager' in window) {
+                  try {
+                    const registration = await navigator.serviceWorker.ready;
+                    const permission = await Notification.requestPermission();
+                    
+                    if (permission === 'granted') {
+                      const subscription = await registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: VAPID_PUBLIC_KEY
+                      });
+                      
+                      // Send subscription to backend
+                      await axios.post(`${API_BASE_URL}/api/notifications/subscribe`, {
+                        clientId: response.data.client_id,
+                        subscription: subscription
+                      });
+                      console.log('Push subscription successful');
+                    }
+                  } catch (pushErr) {
+                    console.error('Error during push subscription:', pushErr);
+                  }
+                }
+
                 navigate('/client/services');
             }
         } catch (err) {
