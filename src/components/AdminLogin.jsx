@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ShieldCheck, User, Lock, ArrowRight } from 'lucide-react';
+import API_BASE_URL from '../config';
 
 const AdminLogin = () => {
     const [username, setUsername] = useState('');
@@ -22,7 +23,7 @@ const AdminLogin = () => {
         setLoading(true);
 
         try {
-            const response = await axios.post(`http://${window.location.hostname}:3001/api/admin/auth`, {
+            const response = await axios.post(`${API_BASE_URL}/api/admin/auth`, {
                 username,
                 password
             });
