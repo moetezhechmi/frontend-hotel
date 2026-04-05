@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  
+  --color-primary: #000666;
+  --color-primary-container: #1A237E;
+  --color-on-primary: #ffffff;
+  
+  --color-secondary: #835400;
+  --color-secondary-container: #FCAB28;
+  
+  --color-tertiary: #002104;
+  --color-tertiary-container: #00390A;
+  
+  --color-surface-lowest: #ffffff;
+  --color-surface-container-low: #f3f4f5;
+  --color-surface-container: #edeeef;
+  --color-surface-container-high: #e5e7eb;
+  --color-surface-container-highest: #e1e3e4;
+  
+  --color-on-surface: #191c1d;
+  --color-outline-variant: #c6c5d4;
+  
+  --text-display-lg: 3.5rem;
+  --text-display-md: 2.75rem;
+  --text-display-sm: 2.25rem;
+  --text-headline-lg: 2rem;
+  --text-headline-md: 1.75rem;
+  --text-headline-sm: 1.5rem;
+  --text-body-lg: 1rem;
+  --text-label-md: 0.75rem;
+  
+  --border-radius-md: 0.75rem;
+  --border-radius-xl: 1.5rem;
+}
+
+@layer base {
+  body {
+    @apply bg-surface-container font-sans text-on-surface;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer utilities {
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out forwards;
+  }
+  .animate-bounce-in {
+    animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  }
+  .animate-slide-left {
+    animation: slideFromLeft 0.3s ease-out forwards;
+  }
+  .animate-slide-right {
+    animation: slideFromRight 0.3s ease-out forwards;
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-out forwards;
+  }
+  .animate-bounce-slow {
+    animation: bounceSlow 3s infinite ease-in-out;
+  }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.05); }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideFromLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideFromRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes bounceSlow {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(-50%, -10px); }
+}
