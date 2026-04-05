@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import { Users, Search, BedDouble, SignalHigh, SignalLow, LogOut, UserPlus, X, ShoppingCart, Bell, Check, Clock, Calendar, Plus, Trash2, Image, Tag, Waves, Sparkles, Utensils, Coffee, Edit3, Save, History, Globe } from 'lucide-react';
+import { Users, Search, BedDouble, SignalHigh, SignalLow, LogOut, UserPlus, X, ShoppingCart, Bell, Check, Clock, Calendar, Plus, Trash2, Image, Tag, Waves, Sparkles, Utensils, Coffee, Edit3, Save, History, Globe, MapPin } from 'lucide-react';
 import { transformImageUrl } from '../utils/cdn';
+import API_BASE_URL from '../config';
 
 
 const Dashboard = () => {
@@ -77,7 +78,7 @@ const Dashboard = () => {
         setHistoryStatusFilter('all');
         
         try {
-            const res = await fetch(`http://localhost:3001/api/clients/${client.id}/activity`);
+            const res = await fetch(`${API_BASE_URL}/api/clients/${client.id}/activity`);
             const data = await res.json();
             if (data.success) {
                 setClientActivities(data);
@@ -95,7 +96,7 @@ const Dashboard = () => {
 
         // Fetch chambres
         const fetchChambres = () => {
-            fetch('http://localhost:3001/api/admin/chambres', {
+            fetch(API_BASE_URL + '/api/admin/chambres', {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
             })
                 .then(res => res.json())
@@ -107,7 +108,7 @@ const Dashboard = () => {
 
         // Fetch ALL clients from DB
         const fetchAllClients = () => {
-            fetch('http://localhost:3001/api/admin/clients', {
+            fetch(API_BASE_URL + '/api/admin/clients', {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
             })
                 .then(res => res.json())
@@ -118,7 +119,7 @@ const Dashboard = () => {
         };
 
         const fetchRequests = () => {
-            fetch('http://localhost:3001/api/admin/requests', {
+            fetch(API_BASE_URL + '/api/admin/requests', {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
             })
                 .then(res => res.json())
@@ -132,7 +133,7 @@ const Dashboard = () => {
         };
 
         const fetchActivities = () => {
-            fetch('http://localhost:3001/api/activities')
+            fetch(API_BASE_URL + '/api/activities')
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) setActivities(data.activities);
@@ -141,7 +142,7 @@ const Dashboard = () => {
         };
 
         const fetchExperiences = () => {
-            fetch('http://localhost:3001/api/experiences')
+            fetch(API_BASE_URL + '/api/experiences')
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) setExperiences(data.experiences);
@@ -150,7 +151,7 @@ const Dashboard = () => {
         };
 
         const fetchMenu = () => {
-            fetch('http://localhost:3001/api/admin/menu', {
+            fetch(API_BASE_URL + '/api/admin/menu', {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
             })
                 .then(res => res.json())
@@ -161,7 +162,7 @@ const Dashboard = () => {
         };
 
         const fetchInternalServices = () => {
-            fetch('http://localhost:3001/api/admin/internal-services', {
+            fetch(API_BASE_URL + '/api/admin/internal-services', {
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
             })
                 .then(res => res.json())
@@ -172,7 +173,7 @@ const Dashboard = () => {
         };
 
         const fetchLieuxVisite = () => {
-            fetch('http://localhost:3001/api/lieux-visite')
+            fetch(API_BASE_URL + '/api/lieux-visite')
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) setLieuxVisite(data.items);
@@ -190,7 +191,7 @@ const Dashboard = () => {
         fetchLieuxVisite();
 
         // Connect to WebSocket server
-        const socket = io('http://localhost:3001');
+        const socket = io(API_BASE_URL + '');
 
         socket.on('active_clients_list', (data) => {
             setClients(data);
@@ -250,8 +251,8 @@ const Dashboard = () => {
         setSubmitError('');
         try {
             const url = editingClient
-                ? `http://localhost:3001/api/admin/clients/${editingClient.id}`
-                : 'http://localhost:3001/api/admin/clients';
+                ? `${API_BASE_URL}/api/admin/clients/${editingClient.id}`
+                : API_BASE_URL + '/api/admin/clients';
             const method = editingClient ? 'PUT' : 'POST';
 
             const res = await fetch(url, {
@@ -272,7 +273,7 @@ const Dashboard = () => {
                 setTimeout(() => setLatestNotification(null), 3000);
                 
                 // Refresh data
-                const clientsRes = await fetch('http://localhost:3001/api/admin/clients', {
+                const clientsRes = await fetch(API_BASE_URL + '/api/admin/clients', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
                 }).then(r => r.json());
                 if (clientsRes.success) setAllClients(clientsRes.clients);
@@ -292,8 +293,8 @@ const Dashboard = () => {
 
         try {
             const url = editingRoom
-                ? `http://localhost:3001/api/admin/chambres/${editingRoom.id}`
-                : 'http://localhost:3001/api/admin/chambres';
+                ? `${API_BASE_URL}/api/admin/chambres/${editingRoom.id}`
+                : API_BASE_URL + '/api/admin/chambres';
             const method = editingRoom ? 'PUT' : 'POST';
 
             const res = await fetch(url, {
@@ -306,7 +307,7 @@ const Dashboard = () => {
             });
             const data = await res.json();
             if (data.success) {
-                const updated = await fetch('http://localhost:3001/api/admin/chambres', {
+                const updated = await fetch(API_BASE_URL + '/api/admin/chambres', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
                 }).then(r => r.json());
                 if (updated.success) setChambres(updated.chambres);
@@ -329,7 +330,7 @@ const Dashboard = () => {
         formData.append('image', file);
         setUploadingImage(true);
         try {
-            const res = await fetch('http://localhost:3001/api/admin/upload', {
+            const res = await fetch(API_BASE_URL + '/api/admin/upload', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` },
                 body: formData
@@ -347,7 +348,7 @@ const Dashboard = () => {
 
     const updateRequestStatut = async (type, id, statut) => {
         try {
-            const res = await fetch(`http://localhost:3001/api/admin/requests/${type}/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/requests/${type}/${id}`, {
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -357,7 +358,7 @@ const Dashboard = () => {
             });
             if (res.ok) {
                 // Refresh local data
-                fetch('http://localhost:3001/api/admin/requests', {
+                fetch(API_BASE_URL + '/api/admin/requests', {
                     headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
                 })
                     .then(r => r.json())
@@ -377,8 +378,8 @@ const Dashboard = () => {
         e.preventDefault();
         try {
             const url = editingMenuItem
-                ? `http://localhost:3001/api/admin/menu/${editingMenuItem.id}`
-                : 'http://localhost:3001/api/admin/menu';
+                ? `${API_BASE_URL}/api/admin/menu/${editingMenuItem.id}`
+                : API_BASE_URL + '/api/admin/menu';
             const method = editingMenuItem ? 'PUT' : 'POST';
 
             const res = await fetch(url, {
@@ -407,7 +408,7 @@ const Dashboard = () => {
 
 
     const toggleMenuDispo = async (id, currentDispo) => {
-        const res = await fetch(`http://localhost:3001/api/admin/menu/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/api/admin/menu/${id}`, {
             method: 'PUT',
             headers: { 
                 'Content-Type': 'application/json',
@@ -422,7 +423,7 @@ const Dashboard = () => {
 
     const deleteMenuItem = async (id) => {
         if (!window.confirm('Supprimer ce plat ?')) return;
-        const res = await fetch(`http://localhost:3001/api/admin/menu/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/api/admin/menu/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
         });
@@ -435,8 +436,8 @@ const Dashboard = () => {
         e.preventDefault();
         try {
             const url = editingActivity
-                ? `http://localhost:3001/api/admin/activities/${editingActivity.id}`
-                : 'http://localhost:3001/api/admin/activities';
+                ? `${API_BASE_URL}/api/admin/activities/${editingActivity.id}`
+                : API_BASE_URL + '/api/admin/activities';
             const method = editingActivity ? 'PUT' : 'POST';
 
             const res = await fetch(url, {
@@ -468,7 +469,7 @@ const Dashboard = () => {
 
     const handleDeleteActivity = async (id) => {
         try {
-            const res = await fetch(`http://localhost:3001/api/admin/activities/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/activities/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
@@ -486,8 +487,8 @@ const Dashboard = () => {
         e.preventDefault();
         try {
             const url = editingExperience
-                ? `http://localhost:3001/api/admin/experiences/${editingExperience.id}`
-                : 'http://localhost:3001/api/admin/experiences';
+                ? `${API_BASE_URL}/api/admin/experiences/${editingExperience.id}`
+                : API_BASE_URL + '/api/admin/experiences';
             const method = editingExperience ? 'PUT' : 'POST';
 
             const res = await fetch(url, {
@@ -519,7 +520,7 @@ const Dashboard = () => {
 
     const handleDeleteExperience = async (id) => {
         try {
-            const res = await fetch(`http://localhost:3001/api/admin/experiences/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/experiences/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
@@ -537,8 +538,8 @@ const Dashboard = () => {
         e.preventDefault();
         try {
             const url = editingInternalService
-                ? `http://localhost:3001/api/admin/internal-services/${editingInternalService.id}`
-                : 'http://localhost:3001/api/admin/internal-services';
+                ? `${API_BASE_URL}/api/admin/internal-services/${editingInternalService.id}`
+                : API_BASE_URL + '/api/admin/internal-services';
             const method = editingInternalService ? 'PUT' : 'POST';
 
             const res = await fetch(url, {
@@ -568,7 +569,7 @@ const Dashboard = () => {
     const handleDeleteRoom = async (id) => {
         if (!window.confirm('Supprimer cette chambre ?')) return;
         try {
-            const res = await fetch(`http://localhost:3001/api/admin/chambres/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/chambres/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
             });
@@ -579,7 +580,7 @@ const Dashboard = () => {
     const handleDeleteClient = async (id) => {
         if (!window.confirm('Supprimer ce client ?')) return;
         try {
-            const res = await fetch(`http://localhost:3001/api/admin/clients/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/clients/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
             });
@@ -591,8 +592,8 @@ const Dashboard = () => {
         e.preventDefault();
         try {
             const url = editingLieu
-                ? `http://localhost:3001/api/admin/lieux-visite/${editingLieu.id}`
-                : 'http://localhost:3001/api/admin/lieux-visite';
+                ? `${API_BASE_URL}/api/admin/lieux-visite/${editingLieu.id}`
+                : API_BASE_URL + '/api/admin/lieux-visite';
             const method = editingLieu ? 'PUT' : 'POST';
 
             const res = await fetch(url, {
@@ -622,7 +623,7 @@ const Dashboard = () => {
     const handleDeleteLieu = async (id) => {
         if (!window.confirm('Supprimer ce lieu ?')) return;
         try {
-            const res = await fetch(`http://localhost:3001/api/admin/lieux-visite/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/lieux-visite/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
             });
@@ -633,7 +634,7 @@ const Dashboard = () => {
 
     const toggleInternalService = async (id, currentStatus) => {
         try {
-            const res = await fetch(`http://localhost:3001/api/admin/internal-services/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/internal-services/${id}`, {
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -650,7 +651,7 @@ const Dashboard = () => {
     const deleteInternalService = async (id) => {
         if (!window.confirm('Supprimer ce service ?')) return;
         try {
-            const res = await fetch(`http://localhost:3001/api/admin/internal-services/${id}`, {
+            const res = await fetch(`${API_BASE_URL}/api/admin/internal-services/${id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
             });
@@ -1706,7 +1707,7 @@ const Dashboard = () => {
                                                                 setUploadingImage(true);
                                                                 const formData = new FormData();
                                                                 formData.append('image', file);
-                                                                const res = await fetch('http://localhost:3001/api/admin/upload', {
+                                                                const res = await fetch(API_BASE_URL + '/api/admin/upload', {
                                                                     method: 'POST',
                                                                     headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` },
                                                                     body: formData

@@ -1,11 +1,12 @@
 import * as db from './db';
+import API_BASE_URL from '../config';
 
 /**
  * Prefetching Strategy for High Traffic (1000+ users)
  * Loads data into IndexedDB before the user even enters the dashboard.
  */
 export const prefetchHotelData = async () => {
-    const baseUrl = `http://${window.location.hostname}:3001/api`;
+    const baseUrl = `${API_BASE_URL}/api`;
     
     const prefetch = async (url, key) => {
         try {

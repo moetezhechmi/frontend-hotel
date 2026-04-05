@@ -7,6 +7,7 @@ import { LogOut, Coffee, Wifi, Phone, BellRing, ChevronRight, X, Minus, Plus, Ch
 import { translations } from '../translations';
 import * as db from '../utils/db';
 import { transformImageUrl } from '../utils/cdn';
+import API_BASE_URL from '../config';
 
 
 const ClientHome = () => {
@@ -84,7 +85,7 @@ const ClientHome = () => {
 
     const fetchActivity = (cid) => {
         if (!cid) return;
-        fetch(`http://${window.location.hostname}:3001/api/clients/${cid}/activity`)
+        fetch(`${API_BASE_URL}/api/clients/${cid}/activity`)
             .then(r => r.json())
             .then(data => { if (data.success) setMyActivity(data); })
             .catch(console.error);
@@ -125,11 +126,11 @@ const ClientHome = () => {
     };
 
     const fetchAllData = () => {
-        syncWithCache('menu', 'http://localhost:3001/api/menu', setMenuItems);
-        syncWithCache('internal_services', 'http://localhost:3001/api/internal-services', setInternalServicesList);
-        syncWithCache('activities', `http://${window.location.hostname}:3001/api/activities`, setHotelActivities);
-        syncWithCache('experiences', `http://${window.location.hostname}:3001/api/experiences`, setExperiences);
-        syncWithCache('lieux_visite', `http://${window.location.hostname}:3001/api/lieux-visite`, setLieuxVisite);
+        syncWithCache('menu', `${API_BASE_URL}/api/menu`, setMenuItems);
+        syncWithCache('internal_services', `${API_BASE_URL}/api/internal-services`, setInternalServicesList);
+        syncWithCache('activities', `${API_BASE_URL}/api/activities`, setHotelActivities);
+        syncWithCache('experiences', `${API_BASE_URL}/api/experiences`, setExperiences);
+        syncWithCache('lieux_visite', `${API_BASE_URL}/api/lieux-visite`, setLieuxVisite);
         
         const cid = localStorage.getItem('clientId');
         if (cid && !isOfflineMode) fetchActivity(cid);

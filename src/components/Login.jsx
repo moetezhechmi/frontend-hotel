@@ -4,6 +4,7 @@ import axios from 'axios';
 import { KeyRound, DoorClosed, ArrowRight, Globe, Check, CloudOff, Wifi, Info } from 'lucide-react';
 import { translations } from '../translations';
 import { prefetchHotelData } from '../utils/sync';
+import API_BASE_URL from '../config';
 
 
 const Login = () => {
@@ -81,7 +82,7 @@ const Login = () => {
         setLoading(true);
 
         try {
-            const response = await axios.post(`http://${window.location.hostname}:3001/api/auth`, {
+            const response = await axios.post(`${API_BASE_URL}/api/auth`, {
                 numeroChambre,
                 codeTemporaire
             });
