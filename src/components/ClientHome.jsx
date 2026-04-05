@@ -7,7 +7,8 @@ import { LogOut, Coffee, Wifi, Phone, BellRing, ChevronRight, X, Minus, Plus, Ch
 import { translations } from '../translations';
 import * as db from '../utils/db';
 import { transformImageUrl } from '../utils/cdn';
-import API_BASE_URL from '../config';
+import API_BASE_URL, { VAPID_PUBLIC_KEY } from '../config';
+import axios from 'axios';
 
 
 const ClientHome = () => {
@@ -32,6 +33,40 @@ const ClientHome = () => {
     const [selectedHistoryItem, setSelectedHistoryItem] = useState(null);
     const [historyTypeFilter, setHistoryTypeFilter] = useState('all'); // 'all', 'order', 'service'
     const [historySearch, setHistorySearch] = useState('');
+    const [isSubscribed, setIsSubscribed] = useState(false);
+
+    useEffect(() => {
+        if ('Notification' in window) {
+            setIsSubscribed(Notification.permission === 'granted');
+        }
+    }, []);
+
+    const handleSubscribe = async () => {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+        
+        try {
+            const registration = await navigator.serviceWorker.ready;
+            const permission = await Notification.requestPermission();
+            
+            if (permission === 'granted') {
+                const subscription = await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: VAPID_PUBLIC_KEY
+                });
+                
+                await axios.post(`${API_BASE_URL}/api/notifications/subscribe`, {
+                    clientId: clientInfo.id,
+                    subscription: subscription
+                });
+                
+                setIsSubscribed(true);
+                alert('Notifications activées !');
+            }
+        } catch (err) {
+            console.error('Push error:', err);
+            alert('Erreur lors de l\'activation.');
+        }
+    };
 
 
 
@@ -613,6 +648,16 @@ const ClientHome = () => {
                     <span className="text-[10px] font-bold tracking-[0.1em] text-[#FDB813] uppercase block mb-3">{lang === 'fr' ? "L'art de vivre" : (lang === 'ar' ? "فنيات الحياة" : "The Art of Living")}</span>
                     <h2 className="text-3xl font-bold mb-4 leading-tight">{t.welcome}<br/>Hari Club</h2>
                     <p className="text-sm text-gray-300/80 font-light leading-relaxed">{t.subtitle}</p>
+                    
+                    {!isSubscribed && !isOfflineMode && (
+                        <button 
+                            onClick={handleSubscribe}
+                            className="mt-6 flex items-center justify-center gap-3 bg-red-500 text-white px-6 py-4 rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-lg animate-pulse hover:bg-red-600 transition-all w-full"
+                        >
+                            <BellRing className="h-5 w-5" />
+                            Activer les notifications 🔔
+                        </button>
+                    )}
                 </div>
 
                 <div 
