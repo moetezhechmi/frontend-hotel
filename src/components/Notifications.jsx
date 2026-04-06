@@ -115,6 +115,13 @@ const Notifications = () => {
                         {notifications.map((notif, idx) => (
                             <div 
                                 key={notif.id} 
+                                onClick={() => {
+                                    if (notif.type === 'MARKETING') {
+                                        navigate(notif.refType || '/client/notifications');
+                                    } else if (notif.refId && notif.refType) {
+                                        navigate(`/client/services?detailsId=${notif.refId}&detailsType=${notif.refType}`);
+                                    }
+                                }}
                                 className="bg-white/5 hover:bg-white/[0.08] border border-white/5 hover:border-white/10 rounded-[28px] p-6 transition-all duration-300 slide-up group cursor-pointer"
                                 style={{ animationDelay: `${idx * 100}ms` }}
                             >

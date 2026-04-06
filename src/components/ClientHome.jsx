@@ -139,7 +139,23 @@ const ClientHome = () => {
         if (!cid) return;
         fetch(`${API_BASE_URL}/api/clients/${cid}/activity`)
             .then(r => r.json())
-            .then(data => { if (data.success) setMyActivity(data); })
+            .then(data => { 
+                if (data.success) {
+                    setMyActivity(data); 
+                    
+                    const params = new URLSearchParams(window.location.search);
+                    const detailsId = params.get('detailsId');
+                    const detailsType = params.get('detailsType');
+                    if (detailsId && detailsType) {
+                        const list = detailsType === 'order' ? data.orders : data.services;
+                        const item = list.find(i => String(i.id) === detailsId);
+                        if (item) {
+                            setSelectedHistoryItem({ ...item, _type: detailsType });
+                            window.history.replaceState({}, '', window.location.pathname);
+                        }
+                    }
+                } 
+            })
             .catch(console.error);
     };
 
@@ -276,15 +292,16 @@ const ClientHome = () => {
             const newNotif = {
                 id: Date.now(),
                 message: data.message,
+                title: data.title || 'Hari Club Hotel',
                 type: data.type,
-                refId: data.data?.id,
-                refType: data.type === 'ORDER' ? 'order' : 'service',
+                refId: data.type === 'MARKETING' ? null : data.data?.id,
+                refType: data.type === 'MARKETING' ? data.data?.refType : (data.type === 'ORDER' ? 'order' : 'service'),
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                 read: false
             };
             setNotifications(prev => [newNotif, ...prev]);
             db.saveNotif(newNotif); 
-            if (cid) fetchActivity(cid);
+            if (cid && data.type !== 'MARKETING') fetchActivity(cid);
         });
 
 
