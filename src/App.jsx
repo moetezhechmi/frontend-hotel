@@ -2,6 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import ClientHome from './components/ClientHome';
+import Notifications from './components/Notifications';
+import MarketingPageView from './components/MarketingPageView';
 import AdminLogin from './components/AdminLogin';
 import { registerSW } from 'virtual:pwa-register';
 
@@ -15,6 +17,8 @@ function App() {
         <Route path="/" element={<Navigate to="/client" replace />} />
         <Route path="/client" element={<Login />} />
         <Route path="/client/services" element={<ClientHome />} />
+        <Route path="/client/notifications" element={<Notifications />} />
+        <Route path="/client/page/:slug" element={<MarketingPageView />} />
         <Route path="/dashboard/login" element={<AdminLogin />} />
         <Route path="/dashboard" element={<Dashboard />} />
       </Routes>

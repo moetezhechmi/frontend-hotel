@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
-import { Users, Search, BedDouble, SignalHigh, SignalLow, LogOut, UserPlus, X, ShoppingCart, Bell, Check, Clock, Calendar, Plus, Trash2, Image, Tag, Waves, Sparkles, Utensils, Coffee, Edit3, Save, History, Globe, MapPin } from 'lucide-react';
+import { Users, Search, BedDouble, SignalHigh, SignalLow, LogOut, UserPlus, X, ShoppingCart, Bell, BellRing, Check, Clock, Calendar, Plus, Trash2, Image, ImageIcon, Tag, Waves, Sparkles, Utensils, Coffee, Edit3, Save, History, Globe, MapPin, FileStack, Layers, ExternalLink, ChevronDown } from 'lucide-react';
 import { transformImageUrl } from '../utils/cdn';
 import API_BASE_URL from '../config';
 
@@ -64,6 +64,69 @@ const Dashboard = () => {
     const [historyTypeFilter, setHistoryTypeFilter] = useState('all'); // all, order, service
     const [historyStatusFilter, setHistoryStatusFilter] = useState('all');
     const [uploadingImage, setUploadingImage] = useState(false);
+
+    // Custom Notification States
+    const [customNotif, setCustomNotif] = useState({ title: '', body: '', clientId: 'all', url: '' });
+    const [isSendingNotif, setIsSendingNotif] = useState(false);
+    
+    // Marketing Pages States
+    const [marketingPages, setMarketingPages] = useState([]);
+    const [showAddPageModal, setShowAddPageModal] = useState(false);
+    const [newPage, setNewPage] = useState({ slug: '', titre: '', contenu: '', image: '', statut: 'Brouillon' });
+    const [editingPage, setEditingPage] = useState(null);
+
+    const marketing_templates = [
+        {
+            id: 'promo',
+            name: 'Offre Promotionnelle',
+            icon: '🎁',
+            html: `<h2>Offre Spéciale !</h2>
+<p>Profitez de notre promotion exclusive disponible uniquement via notre application mobile.</p>
+<div style="background: rgba(253, 184, 19, 0.1); border: 1px dashed #FDB813; padding: 20px; border-radius: 15px; text-align: center;">
+    <h1 style="color: #FDB813; font-size: 3rem; margin: 0;">-20%</h1>
+    <p style="font-weight: bold; margin: 0;">SUR VOTRE PROCHAIN DÎNER</p>
+</div>
+<p>Valable au restaurant principal de l'hôtel ce soir. Ne ratez pas cette occasion !</p>
+<ul>
+    <li>Buffet à volonté</li>
+    <li>Boissons incluses</li>
+    <li>Ambiance musicale</li>
+</ul>`
+        },
+        {
+            id: 'event',
+            name: 'Événement Spécial',
+            icon: '🎭',
+            html: `<h2>Soirée à Thème</h2>
+<p>Nous avons le plaisir de vous inviter à notre événement spécial de la semaine.</p>
+<div style="display: flex; gap: 20px; margin: 20px 0;">
+    <div style="flex: 1; border-right: 1px solid rgba(255,255,255,0.1);">
+        <p style="font-size: 0.8rem; opacity: 0.5; margin: 0;">DATE</p>
+        <p style="font-weight: bold;">Samedi 12 Avril</p>
+    </div>
+    <div style="flex: 1;">
+        <p style="font-size: 0.8rem; opacity: 0.5; margin: 0;">HEURE</p>
+        <p style="font-weight: bold;">21:30</p>
+    </div>
+</div>
+<p>Une expérience inoubliable avec des artistes locaux et un menu dégustation exclusif.</p>
+<strong>Réservation obligatoire via la conciergerie.</strong>`
+        },
+        {
+            id: 'info',
+            name: 'Newsletter Info',
+            icon: '📰',
+            html: `<h2>Nouveautés à l'Hôtel</h2>
+<p>Découvrez les dernières améliorations de notre établissement pour rendre votre séjour encore plus agréable.</p>
+<p>Notre nouveau spa est désormais ouvert de 9h à 20h. Venez découvrir nos soins signature inspirés des traditions locales.</p>
+<p><strong>Actualités :</strong></p>
+<ul>
+    <li>Nouveau menu de cocktails au Bar de la Plage</li>
+    <li>Cours de Yoga matinal gratuits</li>
+    <li>Service de navette vers le centre-ville</li>
+</ul>`
+        }
+    ];
 
 
 
@@ -181,6 +244,17 @@ const Dashboard = () => {
                 .catch(console.error);
         };
 
+        const fetchMarketingPages = () => {
+            fetch(API_BASE_URL + '/api/admin/pages', {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) setMarketingPages(data.pages);
+                })
+                .catch(console.error);
+        };
+
         fetchChambres();
         fetchAllClients();
         fetchRequests();
@@ -189,6 +263,7 @@ const Dashboard = () => {
         fetchMenu();
         fetchInternalServices();
         fetchLieuxVisite();
+        fetchMarketingPages();
 
         // Connect to WebSocket server
         const socket = io(API_BASE_URL + '');
@@ -269,7 +344,7 @@ const Dashboard = () => {
                 setNewClient({ nom: '', prenom: '', telephone: '', email: '', chambre_id: '', date_expiration: '' });
                 setEditingClient(null);
                 if (editingClient) setShowAddClientModal(false);
-                setLatestNotification(editingClient ? "Client modifiÃ© !" : "Client ajoutÃ© !");
+                setLatestNotification(editingClient ? "Client modifié !" : "Client ajouté !");
                 setTimeout(() => setLatestNotification(null), 3000);
                 
                 // Refresh data
@@ -558,9 +633,9 @@ const Dashboard = () => {
                     setInternalServicesList(prev => [...prev, data.service]);
                 }
                 setShowAddInternalServiceModal(false);
-                setNewInternalService({ nom: '', icone: 'ðŸ§¹', description: '' });
+                setNewInternalService({ nom: '', icone: '🧹', description: '' });
                 setEditingInternalService(null);
-                setLatestNotification(editingInternalService ? "Service modifiÃ© !" : "Service ajoutÃ© avec succÃ¨s !");
+                setLatestNotification(editingInternalService ? "Service modifié !" : "Service ajouté avec succès !");
                 setTimeout(() => setLatestNotification(null), 3000);
             }
         } catch (err) { console.error(err); }
@@ -661,6 +736,87 @@ const Dashboard = () => {
         } catch (err) { console.error(err); }
     };
 
+    const handleSendCustomNotif = async (e) => {
+        e.preventDefault();
+        if (!customNotif.body) return alert('Le message est obligatoire');
+        
+        setIsSendingNotif(true);
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/admin/notifications/send`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                },
+                body: JSON.stringify(customNotif)
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert('Notification envoyée avec succès !');
+                setCustomNotif({ title: '', body: '', clientId: 'all' });
+            } else {
+                alert('Erreur: ' + data.message);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Erreur de connexion');
+        } finally {
+            setIsSendingNotif(false);
+        }
+    };
+
+    const handleSavePage = async (e) => {
+        if (e) e.preventDefault();
+        try {
+            const url = editingPage
+                ? `${API_BASE_URL}/api/admin/pages/${editingPage.id}`
+                : `${API_BASE_URL}/api/admin/pages`;
+            const method = editingPage ? 'PUT' : 'POST';
+
+            const res = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('adminToken')}`
+                },
+                body: JSON.stringify(newPage)
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (editingPage) {
+                    setMarketingPages(marketingPages.map(p => p.id === editingPage.id ? data.page : p));
+                } else {
+                    setMarketingPages([data.page, ...marketingPages]);
+                }
+                setShowAddPageModal(false);
+                setNewPage({ slug: '', titre: '', contenu: '', image: '', statut: 'Brouillon' });
+                setEditingPage(null);
+                setLatestNotification(editingPage ? "Page mise à jour !" : "Page créée avec succès !");
+                setTimeout(() => setLatestNotification(null), 3000);
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Erreur lors de l'enregistrement");
+        }
+    };
+
+    const handleDeletePage = async (id) => {
+        if (!window.confirm('Supprimer cette page marketing ?')) return;
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/admin/pages/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+            });
+            if (res.ok) {
+                setMarketingPages(marketingPages.filter(p => p.id !== id));
+                setLatestNotification("Page supprimée");
+                setTimeout(() => setLatestNotification(null), 3000);
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-surface-container font-sans flex text-on-surface">
             {/* Sidebar */}
@@ -739,6 +895,20 @@ const Dashboard = () => {
                     >
                         <Globe className="h-5 w-5 shrink-0" />
                         <span className="truncate">Découvrir la région</span>
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('marketing_notifications')}
+                        className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'marketing_notifications' ? 'bg-tertiary/20 text-tertiary shadow-lg shadow-tertiary/20' : 'text-on-surface/60 hover:bg-surface-container-low hover:text-on-surface'}`}
+                    >
+                        <BellRing className="h-5 w-5 shrink-0" />
+                        <span className="truncate font-bold">Marketing Push 📢</span>
+                    </button>
+                    <button 
+                        onClick={() => setActiveTab('marketing_pages')}
+                        className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-medium transition-colors whitespace-nowrap ${activeTab === 'marketing_pages' ? 'bg-primary-container/20 text-primary shadow-lg shadow-primary/20' : 'text-on-surface/60 hover:bg-surface-container-low hover:text-on-surface'}`}
+                    >
+                        <Layers className="h-5 w-5 shrink-0" />
+                        <span className="truncate font-bold">Landing Pages (SEO) 🚀</span>
                     </button>
                 </nav>
             </aside>
@@ -905,7 +1075,7 @@ const Dashboard = () => {
                     {activeTab === 'all_clients' && (
                         <>
                             <div className="mb-8 flex items-center justify-between">
-                                <h2 className="text-xl font-medium text-on-surface">Tous les Clients EnregistrÃ©s</h2>
+                                <h2 className="text-xl font-medium text-on-surface">Tous les Clients Enregistrés</h2>
                                 <button onClick={() => setShowAddClientModal(true)} className="bg-primary text-on-primary px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-primary-container transition-colors flex items-center gap-2 active:scale-95">
                                     <UserPlus className="h-4 w-4" />
                                     Ajouter un Client
@@ -1467,9 +1637,232 @@ const Dashboard = () => {
                             </div>
                         </div>
                     )}
+                    
+                    {activeTab === 'marketing_notifications' && (
+                        <div className="space-y-8 max-w-4xl mx-auto py-10 slide-up">
+                            <div className="bg-tertiary/10 p-10 rounded-[40px] border border-tertiary/20 relative overflow-hidden group">
+                                <div className="absolute -top-20 -right-20 w-64 h-64 bg-tertiary/5 rounded-full blur-3xl group-hover:bg-tertiary/10 transition-all duration-700"></div>
+                                <div className="relative z-10">
+                                    <div className="flex items-center gap-4 mb-4">
+                                        <div className="bg-tertiary text-on-tertiary p-3 rounded-2xl shadow-lg shadow-tertiary/20">
+                                            <BellRing className="h-8 w-8" />
+                                        </div>
+                                        <h2 className="text-3xl font-black text-on-surface tracking-tight">Marketing Push Notifications</h2>
+                                    </div>
+                                    <p className="text-on-surface/50 text-lg font-medium leading-relaxed max-w-2xl">
+                                        Envoyez des messages instantanés directement sur le téléphone ou l'ordinateur de vos clients. Idéal pour les promotions, soirées spéciales ou rappels importants.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="bg-surface-lowest rounded-[40px] border border-surface-container-high shadow-2xl p-10">
+                                <form onSubmit={handleSendCustomNotif} className="space-y-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div className="space-y-4">
+                                            <label className="block text-xs font-black uppercase tracking-[0.2em] text-on-surface/40 px-2">Destinataire</label>
+                                            <div className="relative">
+                                                <Users className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-tertiary" />
+                                                <select 
+                                                    value={customNotif.clientId}
+                                                    onChange={e => setCustomNotif({...customNotif, clientId: e.target.value})}
+                                                    className="w-full pl-14 pr-6 py-4 bg-surface-container-low border-2 border-transparent focus:border-tertiary/30 focus:bg-surface-lowest rounded-2xl outline-none transition-all font-bold appearance-none cursor-pointer"
+                                                >
+                                                    <option value="all">📢 TOUS LES CLIENTS CONNECTÉS</option>
+                                                    <optgroup label="Clients Individuels">
+                                                        {allClients.map(c => (
+                                                            <option key={c.id} value={c.id}>
+                                                                👤 {c.prenom} {c.nom} {c.CodeAcces?.[0]?.Chambre ? `(Ch. ${c.CodeAcces[0].Chambre.numero})` : ''}
+                                                            </option>
+                                                        ))}
+                                                    </optgroup>
+                                                </select>
+                                                <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-20 italic text-[10px] font-black uppercase">Sélectionner</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <label className="block text-xs font-black uppercase tracking-[0.2em] text-on-surface/40 px-2">Titre du Message (Optionnel)</label>
+                                            <div className="relative">
+                                                <Tag className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-on-surface/20" />
+                                                <input 
+                                                    type="text" 
+                                                    placeholder="Hari Club Hotel" 
+                                                    value={customNotif.title}
+                                                    onChange={e => setCustomNotif({...customNotif, title: e.target.value})}
+                                                    className="w-full pl-14 pr-6 py-4 bg-surface-container-low border-2 border-transparent focus:border-primary/30 focus:bg-surface-lowest rounded-2xl outline-none transition-all font-medium"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <label className="block text-xs font-black uppercase tracking-[0.2em] text-on-surface/40 px-2">Contenu du message *</label>
+                                        <div className="relative group">
+                                            <Edit3 className="absolute left-5 top-6 h-5 w-5 text-on-surface/20 group-focus-within:text-tertiary transition-colors" />
+                                            <textarea 
+                                                required
+                                                placeholder="Votre message ici... (ex: Buffet Tunisien à 19h ! 🥘)" 
+                                                value={customNotif.body}
+                                                onChange={e => setCustomNotif({...customNotif, body: e.target.value})}
+                                                className="w-full pl-14 pr-6 py-6 bg-surface-container-low border-2 border-transparent focus:border-tertiary/30 focus:bg-surface-lowest rounded-[32px] outline-none transition-all font-medium h-40 resize-none shadow-inner"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <label className="block text-xs font-black uppercase tracking-[0.2em] text-on-surface/40 px-2">Action au clic — Redirection</label>
+                                        <div className="relative">
+                                            <Layers className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-on-surface/20 pointer-events-none" />
+                                            <select
+                                                value={customNotif.url}
+                                                onChange={e => setCustomNotif({...customNotif, url: e.target.value})}
+                                                className="w-full pl-14 pr-6 py-4 bg-surface-container-low border-2 border-transparent focus:border-tertiary/30 focus:bg-surface-lowest rounded-2xl outline-none transition-all font-bold appearance-none cursor-pointer"
+                                            >
+                                                <option value="">— Aucune redirection —</option>
+                                                <optgroup label="Sections de l'App Client">
+                                                    <option value="/client/services">🏠 Accueil Client</option>
+                                                    <option value="/client/services?modal=history">📋 Mes Commandes & Services (Historique)</option>
+                                                    <option value="/client/services?modal=room-service">🍽️ Room Service / Menu</option>
+                                                    <option value="/client/services?modal=demandes">🛎️ Demandes de Services</option>
+                                                </optgroup>
+                                                {marketingPages.filter(p => p.statut === 'Publié').length > 0 && (
+                                                    <optgroup label="Pages Marketing Publiées 🚀">
+                                                        {marketingPages.filter(p => p.statut === 'Publié').map(p => (
+                                                            <option key={p.id} value={`/client/page/${p.slug}`}>
+                                                                {p.titre}
+                                                            </option>
+                                                        ))}
+                                                    </optgroup>
+                                                )}
+                                            </select>
+                                            <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none opacity-30">
+                                                <ChevronDown className="h-4 w-4" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button 
+                                        type="submit" 
+                                        disabled={isSendingNotif}
+                                        className={`w-full py-5 rounded-[24px] font-black text-lg uppercase tracking-widest shadow-2xl transition-all flex items-center justify-center gap-4 ${isSendingNotif ? 'bg-surface-container-high text-on-surface/30 cursor-not-allowed' : 'bg-tertiary text-on-tertiary hover:scale-[1.02] active:scale-95 shadow-tertiary/30'}`}
+                                    >
+                                        {isSendingNotif ? (
+                                            <>
+                                                <div className="h-5 w-5 border-4 border-on-tertiary border-t-transparent animate-spin rounded-full"></div>
+                                                Envoi en cours...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <SignalHigh className="h-6 w-6" />
+                                                Diffuser la notification
+                                            </>
+                                        )}
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="bg-surface-container-low/30 border border-surface-container-high p-8 rounded-[32px]">
+                                    <h4 className="font-black text-xs uppercase tracking-widest text-on-surface/40 mb-4 flex items-center gap-2">
+                                        <Sparkles className="h-4 w-4 text-tertiary" /> Astuce Premium
+                                    </h4>
+                                    <p className="text-sm text-on-surface/60 leading-relaxed italic">
+                                        "Utilisez des emojis pour augmenter le taux de clic de vos notifications de près de 30% !"
+                                    </p>
+                                </div>
+                                <div className="bg-surface-container-low/30 border border-surface-container-high p-8 rounded-[32px]">
+                                    <h4 className="font-black text-xs uppercase tracking-widest text-on-surface/40 mb-4 flex items-center gap-2">
+                                        <Clock className="h-4 w-4 text-primary" /> Timing Idéal
+                                    </h4>
+                                    <p className="text-sm text-on-surface/60 leading-relaxed italic">
+                                        "L'envoi de notifications pour le petit-déjeuner est optimal entre 7h00 et 8h30."
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'marketing_pages' && (
+                        <div className="space-y-8 animate-fade-in relative pb-20">
+                            <div className="flex justify-between items-center bg-white/5 p-8 rounded-[32px] border border-white/10">
+                                <div>
+                                    <h2 className="text-3xl font-black text-white">Landing Pages Marketing</h2>
+                                    <p className="text-white/40 font-medium">Créez des pages de destination premium pour vos offres et événements.</p>
+                                </div>
+                                <button 
+                                    onClick={() => {
+                                        setEditingPage(null);
+                                        setNewPage({ slug: '', titre: '', contenu: '', image: '', statut: 'Brouillon' });
+                                        setShowAddPageModal(true);
+                                    }}
+                                    className="bg-[#FDB813] text-[#040b28] px-8 py-4 rounded-2xl font-black uppercase tracking-wider shadow-xl shadow-[#FDB813]/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-3"
+                                >
+                                    <Plus className="h-6 w-6" />
+                                    Créer une page
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {marketingPages.map(page => (
+                                    <div key={page.id} className="group relative bg-[#131e50] rounded-[32px] overflow-hidden border border-white/5 hover:border-[#FDB813]/50 transition-all duration-500 shadow-xl">
+                                        <div className="h-48 overflow-hidden relative">
+                                            <img 
+                                                src={page.image || 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=500'} 
+                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                                                alt=""
+                                            />
+                                            <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[10px] font-black uppercase">
+                                                {page.statut}
+                                            </div>
+                                        </div>
+                                        <div className="p-6">
+                                            <h3 className="text-xl font-bold text-white mb-2">{page.titre}</h3>
+                                            <p className="text-white/40 text-sm mb-6 font-medium">Lien : /client/page/{page.slug}</p>
+                                            
+                                            <div className="flex items-center gap-3">
+                                                <button 
+                                                    onClick={() => {
+                                                        setEditingPage(page);
+                                                        setNewPage(page);
+                                                        setShowAddPageModal(true);
+                                                    }}
+                                                    className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-sm font-bold transition-colors"
+                                                >
+                                                    Modifier
+                                                </button>
+                                                <button 
+                                                    onClick={() => window.open(`/client/page/${page.slug}`, '_blank')}
+                                                    className="w-12 h-12 bg-[#FDB813]/10 text-[#FDB813] rounded-xl flex items-center justify-center hover:bg-[#FDB813] hover:text-[#040b28] transition-all"
+                                                >
+                                                    <ExternalLink className="h-5 w-5" />
+                                                </button>
+                                                <button 
+                                                    onClick={async () => {
+                                                        if (window.confirm('Supprimer cette page ?')) {
+                                                            await fetch(`${API_BASE_URL}/api/admin/pages/${page.id}`, {
+                                                                method: 'DELETE',
+                                                                headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` }
+                                                            });
+                                                            // Reload
+                                                            const r = await fetch(`${API_BASE_URL}/api/admin/pages`, { headers: { 'Authorization': `Bearer ${localStorage.getItem('adminToken')}` } });
+                                                            const d = await r.json();
+                                                            if (d.success) setMarketingPages(d.pages);
+                                                        }
+                                                    }}
+                                                    className="w-12 h-12 bg-red-500/10 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
+                                                >
+                                                    <Trash2 className="h-5 w-5" />
+                                                </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                     {activeTab === 'menu' && (
-                        <div className="space-y-6">
+                        <>
                             <div className="flex justify-between items-center mb-8">
                                 <h2 className="text-xl font-medium text-on-surface">Carte Room Service</h2>
                                 <button onClick={() => setShowAddMenuModal(true)} className="bg-primary text-on-primary px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-primary-container transition-colors flex items-center gap-2 active:scale-95">
@@ -1531,12 +1924,11 @@ const Dashboard = () => {
                                         </div>
                                     </div>
                                 ))}
-
                             </div>
-                        </div>
+                        </>
                     )}
                     {activeTab === 'internal_services' && (
-                        <div className="space-y-6">
+                        <>
                             <div className="flex justify-between items-center mb-8">
                                 <h2 className="text-xl font-medium text-on-surface">Services Internes (Ménage, Linge, etc.)</h2>
                                 <button onClick={() => setShowAddInternalServiceModal(true)} className="bg-primary text-on-primary px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-primary-container transition-colors flex items-center gap-2 active:scale-95">
@@ -1579,12 +1971,11 @@ const Dashboard = () => {
                                         </div>
                                     </div>
                                 ))}
-
                             </div>
-                        </div>
+                        </>
                     )}
                     {activeTab === 'lieux_visite' && (
-                        <div className="space-y-6">
+                        <>
                             <div className="flex justify-between items-center mb-8">
                                 <h2 className="text-xl font-medium text-on-surface">Découvrir la région</h2>
                                 <button onClick={() => setShowAddLieuModal(true)} className="bg-primary text-on-primary px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-primary-container transition-colors flex items-center gap-2 active:scale-95 shadow-lg shadow-primary/10">
@@ -1645,7 +2036,7 @@ const Dashboard = () => {
                                     </div>
                                 ))}
                             </div>
-                        </div>
+                        </>
                     )}
                 </div>
 
@@ -2262,7 +2653,7 @@ const Dashboard = () => {
                                     <button onClick={() => {
                                         setShowAddInternalServiceModal(false);
                                         setEditingInternalService(null);
-                                        setNewInternalService({ nom: '', icone: 'ðŸ§¹', description: '' });
+                                        setNewInternalService({ nom: '', icone: '🧹', description: '' });
                                     }} className="text-on-surface/40 hover:text-on-surface/80 hover:bg-surface-container-low p-2 rounded-full transition-colors">
                                         <X className="h-5 w-5" />
                                     </button>
@@ -2288,10 +2679,141 @@ const Dashboard = () => {
                             </div>
                         </div>
                     )}
+            {/* Marketing Page Modal */}
+            {showAddPageModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#040b28]/95 backdrop-blur-2xl animate-fade-in">
+                    <div className="bg-[#131e50] w-full max-w-4xl rounded-[40px] shadow-2xl border border-white/10 overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="px-10 py-8 border-b border-white/5 flex justify-between items-center bg-white/5">
+                            <div>
+                                <h3 className="text-2xl font-black text-white">{editingPage ? 'Modifier la Page' : 'Nouvelle Landing Page'}</h3>
+                                <p className="text-white/40 text-sm font-medium">Configurez votre contenu marketing interactif.</p>
+                            </div>
+                            <button onClick={() => setShowAddPageModal(false)} className="h-12 w-12 rounded-full hover:bg-white/10 flex items-center justify-center transition-colors text-white/40 hover:text-white">
+                                <X className="h-6 w-6" />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-10 space-y-8 scrollbar-elegant">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-4">
+                                    <label className="block text-xs font-black uppercase tracking-widest text-[#FDB813]">Lien de la page (Slug)</label>
+                                    <div className="relative group">
+                                        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20 font-bold">/page/</div>
+                                        <input 
+                                            type="text" 
+                                            placeholder="promo-spa-2024"
+                                            className="w-full pl-20 pr-6 py-4 bg-white/5 border border-white/10 focus:border-[#FDB813]/50 rounded-2xl outline-none text-white font-bold transition-all"
+                                            value={newPage.slug}
+                                            onChange={e => setNewPage({...newPage, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    <label className="block text-xs font-black uppercase tracking-widest text-[#FDB813]">Titre de la page</label>
+                                    <input 
+                                        type="text" 
+                                        className="w-full px-6 py-4 bg-white/5 border border-white/10 focus:border-[#FDB813]/50 rounded-2xl outline-none text-white font-bold"
+                                        value={newPage.titre}
+                                        onChange={e => setNewPage({...newPage, titre: e.target.value})}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="block text-xs font-black uppercase tracking-widest text-white/40 px-2">Utiliser un Template</label>
+                                <div className="grid grid-cols-3 gap-4">
+                                    {marketing_templates.map(tmpl => (
+                                        <button 
+                                            key={tmpl.id}
+                                            onClick={() => setNewPage({...newPage, contenu: tmpl.html})}
+                                            className="p-4 bg-white/5 border border-white/10 rounded-2xl hover:border-[#FDB813]/50 transition-all text-left flex flex-col gap-2 group"
+                                        >
+                                            <span className="text-2xl">{tmpl.icon}</span>
+                                            <span className="text-xs font-black text-white/60 group-hover:text-[#FDB813]">{tmpl.name}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <label className="block text-xs font-black uppercase tracking-widest text-white/40 px-2">Éditeur de Contenu (HTML)</label>
+                                <textarea 
+                                    className="w-full h-64 p-6 bg-white/5 border border-white/10 rounded-[32px] outline-none text-white font-mono text-sm leading-relaxed"
+                                    placeholder="Écrivez votre contenu ici (HTML supporté)..."
+                                    value={newPage.contenu}
+                                    onChange={e => setNewPage({...newPage, contenu: e.target.value})}
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-4">
+                                    <label className="block text-xs font-black uppercase tracking-widest text-white/40 px-2">Image de couverture</label>
+                                    {newPage.image ? (
+                                        <div className="relative rounded-2xl overflow-hidden h-32 border border-white/10 group">
+                                            <img src={newPage.image} alt="" className="w-full h-full object-cover" />
+                                            <button
+                                                onClick={() => setNewPage({...newPage, image: ''})}
+                                                className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-white/10 rounded-2xl cursor-pointer hover:border-[#FDB813]/50 transition-all group">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={async (e) => {
+                                                    const file = e.target.files[0];
+                                                    if (!file) return;
+                                                    const url = await handleFileUpload(file);
+                                                    if (url) setNewPage({...newPage, image: url});
+                                                }}
+                                            />
+                                            {uploadingImage ? (
+                                                <div className="h-6 w-6 border-2 border-[#FDB813] border-t-transparent rounded-full animate-spin" />
+                                            ) : (
+                                                <>
+                                                    <ImageIcon className="h-8 w-8 text-white/20 group-hover:text-[#FDB813]/60 mb-2 transition-colors" />
+                                                    <span className="text-xs font-bold text-white/30 group-hover:text-[#FDB813]/60 transition-colors">Cliquer pour uploader</span>
+                                                </>
+                                            )}
+                                        </label>
+                                    )}
+                                </div>
+                                <div className="space-y-4">
+                                    <label className="block text-xs font-black uppercase tracking-widest text-white/40 px-2">Visibilité</label>
+                                    <select 
+                                        className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl outline-none text-white font-bold appearance-none cursor-pointer"
+                                        value={newPage.statut}
+                                        onChange={e => setNewPage({...newPage, statut: e.target.value})}
+                                    >
+                                        <option value="Brouillon" className="bg-[#131e50]">Brouillon</option>
+                                        <option value="Publié" className="bg-[#131e50]">Publié</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-10 bg-white/5 border-t border-white/5 flex gap-4">
+                            <button onClick={() => setShowAddPageModal(false)} className="flex-1 py-4 bg-white/5 rounded-2xl font-black text-white hover:bg-white/10 transition-all uppercase tracking-wider">
+                                Annuler
+                            </button>
+                            <button 
+                                onClick={handleSavePage}
+                                className="flex-[2] py-4 bg-[#FDB813] text-[#040b28] rounded-2xl font-black shadow-xl shadow-[#FDB813]/20 hover:scale-[1.02] active:scale-95 transition-all uppercase tracking-wider"
+                            >
+                                {editingPage ? 'Mettre à jour la page' : 'Créer la page maintenant'}
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            </main>
-        </div>
-    );
+            )}
+            </div>
+        </main>
+    </div>
+);
 };
 
 

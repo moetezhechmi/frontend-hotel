@@ -30,10 +30,23 @@ self.addEventListener('push', (event) => {
   );
 });
 
-// Open the URL when the notification is clicked
+// Open or focus the URL when the notification is clicked
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+  const urlToOpen = new URL(event.notification.data.url || '/', self.location.origin).href;
+
   event.waitUntil(
-    clients.openWindow(event.notification.data.url)
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // Check if any existing window is already open on this URL
+      for (const client of windowClients) {
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // If no window is open, open a new one
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    })
   );
 });

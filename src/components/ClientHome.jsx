@@ -205,6 +205,13 @@ const ClientHome = () => {
             setClientInfo({ id: cid, chambre: rnum });
         }
 
+        // Handle Deep Linking from Notifications
+        const params = new URLSearchParams(window.location.search);
+        const modalToOpen = params.get('modal');
+        if (modalToOpen) {
+            setActiveModal(modalToOpen);
+        }
+
         // Professional Sync (Initial)
         fetchAllData();
 
@@ -455,14 +462,13 @@ const ClientHome = () => {
                     <div className="relative">
                         <button 
                             onClick={() => {
-                                setShowNotifModal(true);
-                                setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+                                navigate('/client/notifications');
                             }}
                             className="w-10 h-10 rounded-full bg-[#131e50] flex items-center justify-center border border-[#FDB813]/30 hover:border-[#FDB813] transition-all relative"
                         >
                             <BellRing className="h-5 w-5 text-white" />
                             {notifications.filter(n => !n.read).length > 0 && (
-                                <span className="absolute -top-1 -right-1 w-5 h-5 bg-tertiary text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-[#040b28]">
+                                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#FDB813] text-[#040b28] text-[10px] font-black rounded-full flex items-center justify-center border-2 border-[#040b28]">
                                     {notifications.filter(n => !n.read).length}
                                 </span>
                             )}
@@ -532,6 +538,26 @@ const ClientHome = () => {
                                 <div>
                                     <div className="font-bold text-sm">{lang === 'fr' ? "Accueil" : (lang === 'ar' ? "الرئيسية" : "Home")}</div>
                                     <div className="text-[10px] text-gray-500 uppercase">{lang === 'fr' ? "Revenir au début" : (lang === 'ar' ? "العودة للبداية" : "Back to start")}</div>
+                                </div>
+                            </button>
+
+                             <button 
+                                onClick={() => { setIsDrawerOpen(false); navigate('/client/notifications'); }}
+                                className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-white/5 transition-colors text-left"
+                            >
+                                <div className="w-10 h-10 rounded-lg bg-[#FDB813]/10 flex items-center justify-center">
+                                    <BellRing className="h-5 w-5 text-[#FDB813]" />
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex items-center justify-between">
+                                        <div className="font-bold text-sm">{lang === 'fr' ? "Messages" : (lang === 'ar' ? "الرسائل" : "Messages")}</div>
+                                        {notifications.filter(n => !n.read).length > 0 && (
+                                            <span className="w-5 h-5 bg-[#FDB813] text-[#040b28] text-[10px] font-black rounded-full flex items-center justify-center">
+                                                {notifications.filter(n => !n.read).length}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="text-[10px] text-gray-500 uppercase">{lang === 'fr' ? "Notifications & Offres" : (lang === 'ar' ? "تنبيهات وعروض" : "Alerts & Offers")}</div>
                                 </div>
                             </button>
 
