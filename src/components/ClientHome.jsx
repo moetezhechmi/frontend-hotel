@@ -42,29 +42,46 @@ const ClientHome = () => {
     }, []);
 
     const handleSubscribe = async () => {
-        if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+        console.log('--- Tentative d\'activation des notifications ---');
+        if (!('serviceWorker' in navigator)) {
+            console.error('Service Worker non supporté par ce navigateur.');
+            return;
+        }
+        if (!('PushManager' in window)) {
+            console.error('PushManager non supporté par ce navigateur.');
+            return;
+        }
         
         try {
+            console.log('Attente du Service Worker...');
             const registration = await navigator.serviceWorker.ready;
+            console.log('Service Worker prêt ! Demande de permission...');
+
             const permission = await Notification.requestPermission();
+            console.log('Résultat de la demande de permission:', permission);
             
             if (permission === 'granted') {
+                console.log('Génération de l\'abonnement Push...');
                 const subscription = await registration.pushManager.subscribe({
                     userVisibleOnly: true,
                     applicationServerKey: VAPID_PUBLIC_KEY
                 });
                 
+                console.log('Envoi de l\'abonnement au backend...');
                 await axios.post(`${API_BASE_URL}/api/notifications/subscribe`, {
                     clientId: clientInfo.id,
                     subscription: subscription
                 });
                 
                 setIsSubscribed(true);
-                alert('Notifications activées !');
+                alert('Notifications activées avec succès !');
+            } else {
+                console.warn('La permission a été refusée par l\'utilisateur:', permission);
+                alert('Permission refusée. Vérifiez les réglages de votre navigateur.');
             }
         } catch (err) {
-            console.error('Push error:', err);
-            alert('Erreur lors de l\'activation.');
+            console.error('ERREUR DURANT L\'ACTIVATION PUSH:', err);
+            alert('Erreur technique: ' + err.message);
         }
     };
 
@@ -652,7 +669,7 @@ const ClientHome = () => {
                     {!isSubscribed && !isOfflineMode && (
                         <button 
                             onClick={handleSubscribe}
-                            className="mt-6 flex items-center justify-center gap-3 bg-red-500 text-white px-6 py-4 rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-lg animate-pulse hover:bg-red-600 transition-all w-full"
+                            className="mt-6 flex items-center justify-center gap-3 bg-[#FDB813] text-[#040b28] px-6 py-4 rounded-xl font-bold uppercase tracking-widest text-[10px] shadow-lg hover:bg-[#FDB813]/80 transition-all w-full"
                         >
                             <BellRing className="h-5 w-5" />
                             Activer les notifications 🔔

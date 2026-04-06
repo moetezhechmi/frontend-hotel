@@ -9,7 +9,12 @@ export default defineConfig({
       strategies: 'injectManifest',
       srcDir: 'src',
       filename: 'sw.js',
+      injectRegister: 'auto',
       registerType: 'autoUpdate',
+      devOptions: {
+        enabled: true,
+        type: 'module'
+      },
       includeAssets: ['favicon.svg'],
       manifest: {
         name: 'Hari Club Hotel',

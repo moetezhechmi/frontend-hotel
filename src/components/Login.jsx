@@ -80,12 +80,14 @@ const Login = () => {
         }
 
         setLoading(true);
-
+        console.log('Tentative de connexion vers:', API_BASE_URL, { numeroChambre, codeTemporaire });
+        
         try {
             const response = await axios.post(`${API_BASE_URL}/api/auth`, {
                 numeroChambre,
                 codeTemporaire
             });
+            console.log('Réponse reçue:', response.data);
 
             if (response.data.success) {
                 // Store client info / session simply in localStorage for this prototype
@@ -93,33 +95,40 @@ const Login = () => {
                 localStorage.setItem('chambre', response.data.chambre);
                 localStorage.removeItem('offlineMode'); // Clear offline mode if they just logged in!
                 
-                // --- Notification Permission & Subscription ---
-                if ('serviceWorker' in navigator && 'PushManager' in window) {
-                  try {
-                    const registration = await navigator.serviceWorker.ready;
+                // --- Notification Permission & Subscription (NON-BLOCKING) ---
+                if (!window.isSecureContext) {
+                    console.error('CONTEXTE NON SÉCURISÉ : Les notifications sont bloquées par le navigateur sur cette adresse IP. Utilisez localhost ou HTTPS.');
+                }
+
+                if ('serviceWorker' in navigator && 'PushManager' in window && window.isSecureContext) {
+                  navigator.serviceWorker.ready.then(async (registration) => {
+                    console.log('Service Worker prêt pour les notifications');
                     const permission = await Notification.requestPermission();
-                    
+                    console.log('Permission notification:', permission);
                     if (permission === 'granted') {
                       const subscription = await registration.pushManager.subscribe({
                         userVisibleOnly: true,
                         applicationServerKey: VAPID_PUBLIC_KEY
                       });
                       
-                      // Send subscription to backend
                       await axios.post(`${API_BASE_URL}/api/notifications/subscribe`, {
                         clientId: response.data.client_id,
                         subscription: subscription
                       });
                       console.log('Push subscription successful');
                     }
-                  } catch (pushErr) {
-                    console.error('Error during push subscription:', pushErr);
-                  }
+                  }).catch(pushErr => console.error('Error during push subscription:', pushErr));
                 }
 
+                // Redirect immediately!
                 navigate('/client/services');
             }
         } catch (err) {
+            console.error('DÉTAILS ERREUR LOGIN:', err);
+            if (err.response) {
+              console.error('DÉTAILS RESPONSE:', err.response.status, err.response.data);
+            }
+            
             if (err.response && err.response.data && err.response.data.message) {
                 setError(err.response.data.message);
             } else {
