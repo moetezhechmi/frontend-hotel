@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { Users, Search, BedDouble, SignalHigh, SignalLow, LogOut, UserPlus, X, ShoppingCart, Bell, BellRing, Check, Clock, Calendar, Plus, Trash2, Image, ImageIcon, Tag, Waves, Sparkles, Utensils, Coffee, Edit3, Save, History, Globe, MapPin, FileStack, Layers, ExternalLink, ChevronDown } from 'lucide-react';
+import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { transformImageUrl } from '../utils/cdn';
 import API_BASE_URL from '../config';
 
@@ -816,6 +817,25 @@ const Dashboard = () => {
             console.error(err);
         }
     };
+    const hoursCount = {};
+    const itemsCount = {};
+
+    orders.forEach(o => {
+        const d = new Date(o.createdAt);
+        const hour = d.getHours() + "h";
+        
+        hoursCount[hour] = (hoursCount[hour] || 0) + 1;
+
+        if (o.items && Array.isArray(o.items)) {
+            o.items.forEach(item => {
+                itemsCount[item.nom] = (itemsCount[item.nom] || 0) + item.qty;
+            });
+        }
+    });
+
+    const hourlyData = Object.keys(hoursCount).map(k => ({ name: k, Commandes: hoursCount[k] })).sort((a, b) => parseInt(a.name) - parseInt(b.name));
+    const topItemsData = Object.keys(itemsCount).map(k => ({ name: k, Quantité: itemsCount[k] })).sort((a, b) => b.Quantité - a.Quantité).slice(0, 5);
+    const peakHour = hourlyData.length ? hourlyData.reduce((max, obj) => obj.Commandes > max.Commandes ? obj : max, hourlyData[0]).name : 'N/A';
 
     return (
         <div className="min-h-screen bg-surface-container font-sans flex text-on-surface">
@@ -1512,6 +1532,44 @@ const Dashboard = () => {
                                 </div>
                             </div>
 
+                            {/* Analytics Section */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                                <div className="bg-surface-lowest p-6 rounded-[32px] shadow-[0_0px_24px_rgba(25,28,29,0.04)] border border-surface-container-high md:col-span-2">
+                                    <h3 className="text-sm font-bold text-on-surface/50 uppercase tracking-[0.1em] mb-6">Volume des Commandes (Par heure)</h3>
+                                    <div className="h-[200px]">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={hourlyData}>
+                                                <XAxis dataKey="name" stroke="#8884d8" fontSize={10} tickLine={false} axisLine={false} />
+                                                <Tooltip cursor={{fill: 'rgba(0,0,0,0.02)'}} contentStyle={{ borderRadius: '16px', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
+                                                <Bar dataKey="Commandes" fill="#006c4b" radius={[6, 6, 0, 0]} barSize={24}>
+                                                    {hourlyData.map((entry, index) => (
+                                                        <Cell key={`cell-${index}`} fill={entry.name === peakHour ? '#006c4b' : '#006c4b40'} />
+                                                    ))}
+                                                </Bar>
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                </div>
+                                <div className="space-y-6">
+                                    <div className="bg-gradient-to-br from-[#006c4b] to-[#004d35] p-6 rounded-[32px] shadow-lg text-white">
+                                        <h3 className="text-xs font-bold text-white/70 uppercase tracking-[0.15em] mb-1">Heure de Pointe</h3>
+                                        <p className="text-4xl font-black">{peakHour}</p>
+                                    </div>
+                                    <div className="bg-surface-lowest p-6 rounded-[32px] shadow-[0_0px_24px_rgba(25,28,29,0.04)] border border-surface-container-high">
+                                        <h3 className="text-sm font-bold text-on-surface/50 uppercase tracking-[0.1em] mb-4">Top 5 Plats</h3>
+                                        <div className="space-y-3">
+                                            {topItemsData.map((item, i) => (
+                                                <div key={i} className="flex justify-between items-center text-sm">
+                                                    <span className="text-on-surface/80 font-medium truncate pr-2">{i+1}. {item.name}</span>
+                                                    <span className="font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-lg text-xs">{item.Quantité}</span>
+                                                </div>
+                                            ))}
+                                            {topItemsData.length === 0 && <span className="text-xs text-on-surface/40 italic">Aucune donnée récente</span>}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
 
                                 {/* Orders Column */}
@@ -1607,7 +1665,7 @@ const Dashboard = () => {
                                                 <div className="flex justify-between items-start mb-4">
                                                     <div>
                                                         <span className="px-3 py-1 bg-surface-container-low text-[10px] font-bold rounded-lg text-primary uppercase mb-2 inline-block tracking-widest">Chambre {service.chambre}</span>
-                                                        <h4 className="font-bold text-on-surface text-lg">{service.type}</h4>
+                                                        <h4 className="font-bold text-on-surface text-lg">{service.type.replace(/RÃ©servation/g, 'Réservation').replace(/MÃ©nage/g, 'Ménage')}</h4>
                                                         <p className="text-[11px] text-on-surface/40 font-medium tracking-wide uppercase">{new Date(service.createdAt).toLocaleTimeString()}</p>
                                                     </div>
                                                     <span className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest ${

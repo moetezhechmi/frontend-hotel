@@ -465,7 +465,7 @@ const ClientHome = () => {
                 body: JSON.stringify({
                     clientId: clientInfo.id,
                     chambre: clientInfo.chambre,
-                    type: "RÃ©servation: " + selectedActivity + (selectedTarif ? ` (${selectedTarif})` : ""),
+                    type: "Réservation: " + selectedActivity + (selectedTarif ? ` (${selectedTarif})` : ""),
                     notes: activityNotes
                 })
             });
