@@ -5,6 +5,7 @@ import { KeyRound, DoorClosed, ArrowRight, Globe, Check, CloudOff, Wifi, Info } 
 import { translations } from '../translations';
 import { prefetchHotelData } from '../utils/sync';
 import API_BASE_URL, { VAPID_PUBLIC_KEY } from '../config';
+import loginBg from '../assets/login-bg.jpg';
 
 
 const Login = () => {
@@ -141,10 +142,19 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--color-primary-container),_var(--color-primary))] flex flex-col items-center justify-center p-6 relative overflow-hidden" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+        <div 
+            className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans" 
+            dir={lang === 'ar' ? 'rtl' : 'ltr'}
+            style={{ 
+                backgroundImage: `url(${loginBg})`, 
+                backgroundSize: 'cover', 
+                backgroundPosition: 'center' 
+            }}
+        >
             
-            {/* Ambient Background Blur to mimic depth */}
-            <div className="absolute inset-0 bg-primary/20 backdrop-blur-[100px] pointer-events-none"></div>
+            {/* Premium Dark Overlay */}
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] pointer-events-none"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60 pointer-events-none"></div>
 
             <div className="absolute top-6 right-6 z-50">
                 <button 
