@@ -493,7 +493,7 @@ const ClientHome = () => {
             <header className="fixed top-0 left-0 w-full px-6 py-4 flex justify-between items-center z-40" style={{ backgroundColor: '#040b28' }}>
                 <button 
                     onClick={() => setIsDrawerOpen(true)}
-                    className="text-white hover:text-[#FDB813] transition-colors p-1 -ml-1"
+                    className="text-white hover:text-[#FDB813] transition-colors p-1 -ml-1 rtl:-ml-0 rtl:-mr-1"
                 >
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                 </button>
@@ -509,7 +509,7 @@ const ClientHome = () => {
                         >
                             <BellRing className="h-5 w-5 text-white" />
                             {notifications.filter(n => !n.read).length > 0 && (
-                                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#FDB813] text-[#040b28] text-[10px] font-black rounded-full flex items-center justify-center border-2 border-[#040b28]">
+                                <span className="absolute -top-1 -right-1 rtl:-right-auto rtl:-left-1 w-5 h-5 bg-[#FDB813] text-[#040b28] text-[10px] font-black rounded-full flex items-center justify-center border-2 border-[#040b28]">
                                     {notifications.filter(n => !n.read).length}
                                 </span>
                             )}
@@ -527,7 +527,7 @@ const ClientHome = () => {
                         {isLangOpen && (
                             <>
                                 <div className="fixed inset-0 z-40" onClick={() => setIsLangOpen(false)} />
-                                <div className="absolute right-0 mt-3 w-48 bg-[#131e50] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
+                                <div className="absolute right-0 rtl:right-auto rtl:left-0 mt-3 w-48 bg-[#131e50] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
                                     <div className="py-2">
                                         {languages.map((l) => (
                                             <button
@@ -537,7 +537,7 @@ const ClientHome = () => {
                                             >
                                                 <span className="text-xl">{l.flag}</span>
                                                 <span>{l.name}</span>
-                                                {lang === l.code && <Check className="h-4 w-4 ml-auto" />}
+                                                {lang === l.code && <Check className="h-4 w-4 ml-auto rtl:mr-auto rtl:ml-0" />}
                                             </button>
                                         ))}
                                     </div>
@@ -556,7 +556,7 @@ const ClientHome = () => {
                         onClick={() => setIsDrawerOpen(false)}
                     />
                     <div 
-                        className={`fixed top-0 ${lang === 'ar' ? 'right-0' : 'left-0'} h-full w-[280px] bg-[#040b28] z-[70] shadow-2xl transition-transform ${lang === 'ar' ? 'animate-slide-right' : 'animate-slide-left'} border-r border-white/5 flex flex-col`}
+                        className={`fixed top-0 ${lang === 'ar' ? 'right-0' : 'left-0'} h-full w-[280px] bg-[#040b28] z-[70] shadow-2xl transition-transform ${lang === 'ar' ? 'animate-slide-right' : 'animate-slide-left'} border-r rtl:border-r-0 rtl:border-l border-white/5 flex flex-col`}
                     >
                         <div className="p-6 flex justify-between items-center border-b border-white/5">
                             <div className="text-lg font-bold tracking-widest uppercase">{lang === 'fr' ? "Menu" : (lang === 'ar' ? "القائمة" : "Menu")}</div>
@@ -571,7 +571,7 @@ const ClientHome = () => {
                         <div className="flex-1 py-6 px-4 space-y-2">
                             <button 
                                 onClick={() => { setIsDrawerOpen(false); navigate('/client/services'); }}
-                                className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-white/5 transition-colors text-left"
+                                className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-white/5 transition-colors text-left rtl:text-right"
                             >
                                 <div className="w-10 h-10 rounded-lg bg-[#FDB813]/10 flex items-center justify-center">
                                     <Clock className="h-5 w-5 text-[#FDB813]" />
@@ -584,7 +584,7 @@ const ClientHome = () => {
 
                              <button 
                                 onClick={() => { setIsDrawerOpen(false); navigate('/client/notifications'); }}
-                                className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-white/5 transition-colors text-left"
+                                className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-white/5 transition-colors text-left rtl:text-right"
                             >
                                 <div className="w-10 h-10 rounded-lg bg-[#FDB813]/10 flex items-center justify-center">
                                     <BellRing className="h-5 w-5 text-[#FDB813]" />
@@ -604,7 +604,7 @@ const ClientHome = () => {
 
                             <button 
                                 onClick={() => { setIsDrawerOpen(false); setActiveModal('history'); }}
-                                className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-white/5 transition-colors text-left"
+                                className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-white/5 transition-colors text-left rtl:text-right"
                             >
                                 <div className="w-10 h-10 rounded-lg bg-[#FDB813]/10 flex items-center justify-center">
                                     <History className="h-5 w-5 text-[#FDB813]" />
@@ -617,7 +617,7 @@ const ClientHome = () => {
 
                             <button 
                                 onClick={() => { setIsDrawerOpen(false); setActiveModal('programme'); }}
-                                className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-white/5 transition-colors text-left"
+                                className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-white/5 transition-colors text-left rtl:text-right"
                             >
                                 <div className="w-10 h-10 rounded-lg bg-[#FDB813]/10 flex items-center justify-center">
                                     <Calendar className="h-5 w-5 text-[#FDB813]" />
@@ -630,7 +630,7 @@ const ClientHome = () => {
 
                             <button 
                                 onClick={handleLogout}
-                                className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-red-500/10 transition-colors text-left text-red-400"
+                                className="w-full flex items-center gap-4 px-4 py-4 rounded-xl hover:bg-red-500/10 transition-colors text-left rtl:text-right text-red-400"
                             >
                                 <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
                                     <LogOut className="h-5 w-5" />
@@ -728,7 +728,7 @@ const ClientHome = () => {
             <main className={`px-6 ${isOfflineMode ? 'pt-32' : 'pt-24'} max-w-lg mx-auto`}>
 
 
-                <div className="mb-10 text-center sm:text-left">
+                <div className="mb-10 text-center sm:text-left rtl:sm:text-right">
                     <span className="text-[10px] font-bold tracking-[0.1em] text-[#FDB813] uppercase block mb-3">{lang === 'fr' ? "L'art de vivre" : (lang === 'ar' ? "فنيات الحياة" : "The Art of Living")}</span>
                     <h2 className="text-3xl font-bold mb-4 leading-tight">{t.welcome}<br/>Hari Club</h2>
                     <p className="text-sm text-gray-300/80 font-light leading-relaxed">{t.subtitle}</p>
@@ -752,7 +752,7 @@ const ClientHome = () => {
                         <div className="w-14 h-14 rounded-2xl bg-[#FDB813] flex items-center justify-center shrink-0 shadow-lg shadow-[#FDB813]/20 group-hover:scale-110 transition-transform">
                             <MapPin className="h-7 w-7 text-[#040b28]" />
                         </div>
-                        <div className="text-left">
+                        <div className="text-left rtl:text-right">
                             <span className="text-[10px] font-black tracking-[0.15em] text-[#FDB813] uppercase block mb-1">Guide Local</span>
                             <h4 className="text-xl font-bold text-white leading-tight group-hover:text-[#FDB813] transition-colors">{lang === 'fr' ? "Découvrir la région" : (lang === 'ar' ? "اكتشف المنطقة" : "Discover the region")}</h4>
                             <p className="text-[10px] text-gray-400 font-medium mt-1 italic">{lang === 'fr' ? "Accès offline complet à nos adresses favorites" : "Full offline access to our favorite spots"}</p>
@@ -892,7 +892,7 @@ const ClientHome = () => {
                                 <span className="text-label-md uppercase tracking-[0.05em] text-on-surface/50 mb-1 block">Historique</span>
                                 <h2 className="text-headline-sm font-medium text-primary leading-tight">{t.activity_tracking}</h2>
                             </div>
-                            <button onClick={() => setActiveModal(null)} className="p-2 sm:-mr-2 bg-transparent hover:bg-surface-container rounded-full transition-colors text-on-surface/50">
+                            <button onClick={() => setActiveModal(null)} className="p-2 sm:-mr-2 rtl:sm:-ml-2 rtl:sm:mr-0 bg-transparent hover:bg-surface-container rounded-full transition-colors text-on-surface/50">
                                 <X className="h-6 w-6" />
                             </button>
                         </div>
@@ -921,18 +921,18 @@ const ClientHome = () => {
                                     </button>
                                 </div>
                                 <div className="relative">
-                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-on-surface/30" />
+                                    <Search className="absolute left-4 rtl:left-auto rtl:right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-on-surface/30" />
                                     <input 
                                         type="text" 
                                         placeholder={t.search}
                                         value={historySearch}
                                         onChange={e => setHistorySearch(e.target.value)}
-                                        className="w-full bg-surface-container-low border border-surface-container-high rounded-xl pl-11 pr-5 py-3 text-sm text-on-surface placeholder:text-on-surface/30 outline-none focus:outline-primary/30 transition-all"
+                                        className="w-full bg-surface-container-low border border-surface-container-high rounded-xl pl-11 pr-5 rtl:pl-5 rtl:pr-11 py-3 text-sm text-on-surface placeholder:text-on-surface/30 outline-none focus:outline-primary/30 transition-all"
                                     />
                                 </div>
                             </div>
 
-                            <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                            <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2 rtl:pr-0 rtl:pl-2 custom-scrollbar">
                                 {[
                                     ...(historyTypeFilter === 'all' || historyTypeFilter === 'order' ? myActivity.orders.map(o => ({...o, _type: 'order'})) : []),
                                     ...(historyTypeFilter === 'all' || historyTypeFilter === 'service' ? myActivity.services.map(s => ({...s, _type: 'service'})) : [])
@@ -1012,7 +1012,7 @@ const ClientHome = () => {
                                 <span className="text-label-md uppercase tracking-[0.05em] text-secondary mb-1 block">Menu</span>
                                 <h2 className="text-headline-sm font-medium text-primary leading-tight">{t.room_service}</h2>
                             </div>
-                            <button onClick={() => setActiveModal(null)} className="p-2 sm:-mr-2 bg-transparent hover:bg-surface-container rounded-full transition-colors text-on-surface/50">
+                            <button onClick={() => setActiveModal(null)} className="p-2 sm:-mr-2 rtl:sm:-ml-2 rtl:sm:mr-0 bg-transparent hover:bg-surface-container rounded-full transition-colors text-on-surface/50">
                                 <X className="h-6 w-6" />
                             </button>
                         </div>
@@ -1026,7 +1026,7 @@ const ClientHome = () => {
                             </div>
                         ) : (
                             <>
-                                <div className="space-y-6 mb-8 overflow-y-auto flex-1 pr-2 -mr-2">
+                                <div className="space-y-6 mb-8 overflow-y-auto flex-1 pr-2 rtl:pr-0 rtl:pl-2 -mr-2 rtl:-mr-0 rtl:-ml-2">
                                     {!Array.isArray(menuItems) || menuItems.length === 0 ? (
                                         <div className="py-20 text-center opacity-40 italic">
                                             {lang === 'fr' ? "Le menu est temporairement indisponible." : "The menu is temporarily unavailable."}
@@ -1090,7 +1090,7 @@ const ClientHome = () => {
                                 <span className="text-label-md uppercase tracking-[0.05em] text-primary/60 mb-1 block">Services Internes</span>
                                 <h2 className="text-headline-sm font-medium text-primary leading-tight">{t.service_req}</h2>
                             </div>
-                            <button onClick={() => setActiveModal(null)} className="p-2 sm:-mr-2 bg-transparent hover:bg-surface-container rounded-full transition-colors text-on-surface/50">
+                            <button onClick={() => setActiveModal(null)} className="p-2 sm:-mr-2 rtl:sm:-ml-2 rtl:sm:mr-0 bg-transparent hover:bg-surface-container rounded-full transition-colors text-on-surface/50">
                                 <X className="h-6 w-6" />
                             </button>
                         </div>
@@ -1153,7 +1153,7 @@ const ClientHome = () => {
                                     {activityCategory === 'signature' && (lang === 'fr' ? "Expériences Signature" : "Signature Experiences")}
                                 </h2>
                             </div>
-                            <button onClick={() => setActiveModal(null)} className="p-2 sm:-mr-2 bg-transparent hover:bg-surface-container rounded-full transition-colors text-on-surface/50">
+                            <button onClick={() => setActiveModal(null)} className="p-2 sm:-mr-2 rtl:sm:-ml-2 rtl:sm:mr-0 bg-transparent hover:bg-surface-container rounded-full transition-colors text-on-surface/50">
                                 <X className="h-6 w-6" />
                             </button>
                         </div>
@@ -1180,7 +1180,7 @@ const ClientHome = () => {
                                                         setSelectedTarif(null);
                                                     }
                                                 }} 
-                                                className={`w-full relative overflow-hidden rounded-xl border transition-all text-left group min-h-[120px] flex items-center p-4 gap-5 bg-surface-lowest ${selectedActivity === activity.nom ? 'border-primary outline outline-1 outline-primary shadow-[0_0px_16px_rgba(0,6,102,0.1)]' : 'border-transparent shadow-[0_0px_24px_rgba(25,28,29,0.04)] hover:bg-surface-container-low'}`}
+                                                className={`w-full relative overflow-hidden rounded-xl border transition-all text-left rtl:text-right group min-h-[120px] flex items-center p-4 gap-5 bg-surface-lowest ${selectedActivity === activity.nom ? 'border-primary outline outline-1 outline-primary shadow-[0_0px_16px_rgba(0,6,102,0.1)]' : 'border-transparent shadow-[0_0px_24px_rgba(25,28,29,0.04)] hover:bg-surface-container-low'}`}
                                             >
                                                 <img src={transformImageUrl(activity.image)} alt={activity.nom} className="absolute inset-0 w-full h-full object-cover opacity-15 group-hover:opacity-25 transition-opacity" />
 
@@ -1273,7 +1273,7 @@ const ClientHome = () => {
                                 <span className="text-label-md uppercase tracking-[0.05em] text-primary/60 mb-1 block">Hari Club</span>
                                 <h2 className="text-headline-sm font-medium text-primary leading-tight">{t.daily_program}</h2>
                             </div>
-                            <button onClick={() => setActiveModal(null)} className="p-2 sm:-mr-2 bg-transparent hover:bg-surface-container rounded-full transition-colors text-on-surface/50">
+                            <button onClick={() => setActiveModal(null)} className="p-2 sm:-mr-2 rtl:sm:-ml-2 rtl:sm:mr-0 bg-transparent hover:bg-surface-container rounded-full transition-colors text-on-surface/50">
                                 <X className="h-6 w-6" />
                             </button>
                         </div>
@@ -1323,7 +1323,7 @@ const ClientHome = () => {
                                     <h2 className="text-2xl font-bold text-primary leading-tight">{lang === 'fr' ? "Guide Local" : (lang === 'ar' ? "دليل محلي" : "Local Guide")}</h2>
                                 </div>
                             </div>
-                            <button onClick={() => setActiveModal(null)} className="p-2 sm:-mr-2 bg-surface-container-low hover:bg-surface-container rounded-full transition-colors text-on-surface/50">
+                            <button onClick={() => setActiveModal(null)} className="p-2 sm:-mr-2 rtl:sm:-ml-2 rtl:sm:mr-0 bg-surface-container-low hover:bg-surface-container rounded-full transition-colors text-on-surface/50">
                                 <X className="h-6 w-6" />
                             </button>
                         </div>
@@ -1336,7 +1336,7 @@ const ClientHome = () => {
                                     <div key={lieu.id} className="group bg-surface-container-lowest rounded-3xl overflow-hidden border border-surface-container-low hover:border-[#FDB813]/30 transition-all duration-500 shadow-sm hover:shadow-xl">
                                         <div className="relative h-48 overflow-hidden">
                                             <img src={transformImageUrl(lieu.image)} alt={lieu.nom} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                                            <div className="absolute top-4 left-4">
+                                            <div className="absolute top-4 left-4 rtl:left-auto rtl:right-4">
                                                 <span className="px-3 py-1.5 bg-[#040b28]/80 backdrop-blur-md rounded-xl text-[9px] font-black uppercase tracking-widest text-[#FDB813] border border-[#FDB813]/30 shadow-lg">
                                                     {lieu.categorie}
                                                 </span>
@@ -1346,7 +1346,7 @@ const ClientHome = () => {
                                                     href={`https://www.google.com/maps/search/?api=1&query=${lieu.latitude},${lieu.longitude}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className="absolute bottom-4 right-4 w-12 h-12 bg-[#FDB813] text-[#040b28] rounded-2xl flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-transform"
+                                                    className="absolute bottom-4 right-4 rtl:right-auto rtl:left-4 w-12 h-12 bg-[#FDB813] text-[#040b28] rounded-2xl flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-transform"
                                                 >
                                                     <Navigation className="h-6 w-6" />
                                                 </a>
@@ -1383,7 +1383,7 @@ const ClientHome = () => {
                                 <span className="text-label-md uppercase tracking-[0.05em] text-tertiary mb-1 block">Historique</span>
                                 <h2 className="text-headline-sm font-medium text-primary leading-tight">Notifications</h2>
                             </div>
-                            <button onClick={() => setShowNotifModal(false)} className="p-2 sm:-mr-2 bg-transparent hover:bg-surface-container rounded-full transition-colors text-on-surface/50">
+                            <button onClick={() => setShowNotifModal(false)} className="p-2 sm:-mr-2 rtl:sm:-ml-2 rtl:sm:mr-0 bg-transparent hover:bg-surface-container rounded-full transition-colors text-on-surface/50">
                                 <X className="h-6 w-6" />
                             </button>
                         </div>
@@ -1452,7 +1452,7 @@ const ClientHome = () => {
                             </div>
                         </div>
 
-                        <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2 rtl:pr-0 rtl:pl-2 custom-scrollbar">
                             {selectedHistoryItem._type === 'order' ? (
                                 <div className="space-y-4">
                                     <p className="text-[10px] font-bold uppercase tracking-widest text-white/40 border-b border-white/5 pb-2">Résumé des Articles</p>

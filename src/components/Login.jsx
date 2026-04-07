@@ -90,9 +90,10 @@ const Login = () => {
             console.log('Réponse reçue:', response.data);
 
             if (response.data.success) {
-                // Store client info / session simply in localStorage for this prototype
                 localStorage.setItem('clientId', response.data.client_id);
                 localStorage.setItem('chambre', response.data.chambre);
+                if (response.data.token) localStorage.setItem('clientToken', response.data.token);
+                if (response.data.refreshToken) localStorage.setItem('clientRefreshToken', response.data.refreshToken);
                 localStorage.removeItem('offlineMode'); // Clear offline mode if they just logged in!
                 
                 // --- Notification Permission & Subscription (NON-BLOCKING) ---

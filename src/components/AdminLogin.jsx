@@ -30,6 +30,9 @@ const AdminLogin = () => {
 
             if (response.data.success) {
                 localStorage.setItem('adminToken', response.data.token);
+                if (response.data.refreshToken) {
+                    localStorage.setItem('adminRefreshToken', response.data.refreshToken);
+                }
                 navigate('/dashboard');
             }
         } catch (err) {
