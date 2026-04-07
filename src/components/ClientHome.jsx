@@ -244,6 +244,7 @@ const ClientHome = () => {
                     const dbLastNotifs = data.notifications.map(n => ({
                         id: n.id,
                         message: n.message,
+                        title: n.title,
                         type: n.type,
                         refId: n.refId,
                         refType: n.refType,
@@ -316,11 +317,34 @@ const ClientHome = () => {
             setIsOfflineMode(true);
         };
 
+        // Listen for push notifications forwarded by the Service Worker
+        // This fires when the app is open and a Web-Push arrives (marketing)
+        const handleSwMessage = (event) => {
+            if (event.data?.type === 'PUSH_NOTIF') {
+                const swNotif = event.data.notif;
+                // Avoid duplicate: the socket 'new_activity' may already have added it
+                setNotifications(prev => {
+                    const exists = prev.some(n => n.id === swNotif.id);
+                    if (exists) return prev;
+                    return [swNotif, ...prev];
+                });
+                // Also persist in IndexedDB in case it wasn't already written
+                db.saveNotif(swNotif);
+            }
+        };
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('message', handleSwMessage);
+        }
+
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
 
         return () => {
             socket.disconnect();
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.removeEventListener('message', handleSwMessage);
+            }
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };

@@ -24,18 +24,67 @@ const Notifications = () => {
 
     const fetchNotifications = async (clientId) => {
         try {
+            // Load local IndexedDB notifications first (marketing push + cached)
+            const localNotifs = await db.getNotifs();
+
+            // Then fetch from backend (orders / services / global marketing)
             const res = await fetch(`${API_BASE_URL}/api/notifications?clientId=${clientId}`);
             const data = await res.json();
+
             if (data.success) {
-                setNotifications(data.notifications);
-                
-                // Mark all as read in local storage cache
-                const cachedNotifs = await db.getNotifs();
-                const updated = cachedNotifs.map(n => ({ ...n, read: true }));
-                for (const n of updated) await db.saveNotif(n);
+                // Normalize backend notifications into the same shape as IndexedDB ones
+                const backendNotifs = data.notifications.map(n => ({
+                    id: n.id,
+                    message: n.message,
+                    title: n.title,
+                    type: n.type,
+                    refId: n.refId,
+                    refType: n.refType,
+                    createdAt: n.createdAt,
+                    timestamp: new Date(n.createdAt).getTime(),
+                    read: true
+                }));
+
+                // Persist backend notifs into IndexedDB so they survive offline
+                for (const n of backendNotifs) await db.saveNotif(n);
+
+                // Merge: backend notifs first, then any local-only ones (push marketing)
+                // Deduplicate by `id` (backend ids are numeric, local ones are timestamps)
+                const merged = [...backendNotifs];
+                for (const local of localNotifs) {
+                    const alreadyIn = merged.some(n => String(n.id) === String(local.id));
+                    if (!alreadyIn) {
+                        // Normalize createdAt for local notifs
+                        merged.push({
+                            ...local,
+                            createdAt: local.createdAt || new Date(local.timestamp || Date.now()).toISOString()
+                        });
+                    }
+                }
+
+                // Sort newest first
+                merged.sort((a, b) => {
+                    const ta = a.timestamp || new Date(a.createdAt).getTime();
+                    const tb = b.timestamp || new Date(b.createdAt).getTime();
+                    return tb - ta;
+                });
+
+                setNotifications(merged);
+
+                // Mark all local notifs as read
+                const updated = await db.getNotifs();
+                for (const n of updated) await db.saveNotif({ ...n, read: true });
+            } else {
+                // Backend failed — fall back to local IndexedDB only
+                setNotifications(localNotifs);
             }
         } catch (err) {
             console.error('Erreur lors du chargement des notifications:', err);
+            // Offline fallback
+            try {
+                const local = await db.getNotifs();
+                setNotifications(local);
+            } catch (_) { /* nothing */ }
         } finally {
             setLoading(false);
         }
