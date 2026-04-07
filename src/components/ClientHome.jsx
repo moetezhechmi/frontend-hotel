@@ -266,7 +266,7 @@ const ClientHome = () => {
         
         socket.on('connect', () => {
             setIsNetworkOffline(false);
-            if (rnum) socket.emit('join_room', rnum); 
+            if (rnum && cid) socket.emit('join_room', { chambre: rnum, clientId: cid }); 
             syncNotifications();
             fetchAllData();
         });
