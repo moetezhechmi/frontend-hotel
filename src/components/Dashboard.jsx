@@ -820,11 +820,20 @@ const Dashboard = () => {
     const hoursCount = {};
     const itemsCount = {};
 
+    const todayStr = new Date().toLocaleDateString();
+    let todayOrdersCount = 0;
+    let totalRevenueToday = 0;
+
     orders.forEach(o => {
         const d = new Date(o.createdAt);
-        const hour = d.getHours() + "h";
+        const isToday = d.toLocaleDateString() === todayStr;
         
-        hoursCount[hour] = (hoursCount[hour] || 0) + 1;
+        if (isToday) {
+            const hour = d.getHours() + "h";
+            hoursCount[hour] = (hoursCount[hour] || 0) + 1;
+            todayOrdersCount++;
+            totalRevenueToday += Number(o.total || 0);
+        }
 
         if (o.items && Array.isArray(o.items)) {
             o.items.forEach(item => {
@@ -836,6 +845,9 @@ const Dashboard = () => {
     const hourlyData = Object.keys(hoursCount).map(k => ({ name: k, Commandes: hoursCount[k] })).sort((a, b) => parseInt(a.name) - parseInt(b.name));
     const topItemsData = Object.keys(itemsCount).map(k => ({ name: k, Quantité: itemsCount[k] })).sort((a, b) => b.Quantité - a.Quantité).slice(0, 5);
     const peakHour = hourlyData.length ? hourlyData.reduce((max, obj) => obj.Commandes > max.Commandes ? obj : max, hourlyData[0]).name : 'N/A';
+
+    const pendingRequests = orders.filter(o => o.statut === 'En attente').length + services.filter(s => s.statut === 'En attente').length;
+    const occupancyRate = chambres.length ? Math.round((chambres.filter(c => c.isOccupied).length / chambres.length) * 100) : 0;
 
     return (
         <div className="min-h-screen bg-surface-container font-sans flex text-on-surface">
@@ -1013,7 +1025,83 @@ const Dashboard = () => {
                 {/* Dashboard Content */}
                 <div className="p-10 flex-1 bg-surface-container overflow-y-auto">
                     {activeTab === 'clients' && (
-                        <>
+                        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                            {/* KPI SECTION */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                                <div className="bg-surface-lowest p-6 rounded-[24px] shadow-sm border border-surface-container-high transition-transform hover:-translate-y-1">
+                                    <h3 className="text-[10px] font-black text-on-surface/40 uppercase tracking-[0.1em] mb-2 flex items-center gap-2"><ShoppingCart className="h-4 w-4" /> Recettes du jour</h3>
+                                    <div className="flex items-baseline gap-2">
+                                        <p className="text-3xl font-black text-on-surface">{totalRevenueToday.toFixed(2)}</p>
+                                        <span className="text-sm font-bold text-on-surface/50">€</span>
+                                    </div>
+                                    <p className="text-[10px] uppercase font-bold text-primary mt-2">{todayOrdersCount} commandes aujourd'hui</p>
+                                </div>
+                                <div className="bg-gradient-to-br from-primary to-[#004d35] p-6 rounded-[24px] shadow-lg text-on-primary transition-transform hover:-translate-y-1 relative overflow-hidden group">
+                                    <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:scale-110 transition-transform"><BellRing className="h-16 w-16" /></div>
+                                    <h3 className="text-[10px] font-black text-white/60 uppercase tracking-[0.1em] mb-2 relative z-10 flex items-center gap-2"><Clock className="h-4 w-4" /> En attente</h3>
+                                    <p className="text-3xl font-black relative z-10">{pendingRequests}</p>
+                                    <p className="text-[10px] uppercase font-bold text-white/80 mt-2 relative z-10">À traiter immédiatement</p>
+                                </div>
+                                <div className="bg-surface-lowest p-6 rounded-[24px] shadow-sm border border-surface-container-high transition-transform hover:-translate-y-1">
+                                    <h3 className="text-[10px] font-black text-on-surface/40 uppercase tracking-[0.1em] mb-2 flex items-center gap-2"><BedDouble className="h-4 w-4" /> Occupation</h3>
+                                    <p className="text-3xl font-black text-on-surface">{occupancyRate}%</p>
+                                    <div className="w-full bg-surface-container-low h-1.5 rounded-full mt-3 overflow-hidden">
+                                        <div className="bg-tertiary h-full rounded-full transition-all duration-1000" style={{ width: `${occupancyRate}%` }}></div>
+                                    </div>
+                                </div>
+                                <div className="bg-surface-lowest p-6 rounded-[24px] shadow-sm border border-surface-container-high transition-transform hover:-translate-y-1">
+                                    <h3 className="text-[10px] font-black text-on-surface/40 uppercase tracking-[0.1em] mb-2 flex items-center gap-2"><SignalHigh className="h-4 w-4" /> App. Connectés</h3>
+                                    <div className="flex items-baseline gap-2">
+                                        <span className="relative flex h-3 w-3 mt-1">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-3 w-3 bg-secondary"></span>
+                                        </span>
+                                        <p className="text-3xl font-black text-on-surface">{clients.length}</p>
+                                    </div>
+                                    <p className="text-[10px] uppercase font-bold text-secondary mt-2">Utilisateurs en ligne</p>
+                                </div>
+                            </div>
+
+                            {/* Analytics Graphs */}
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12 hidden md:grid">
+                                <div className="bg-surface-lowest p-6 rounded-[24px] shadow-[0_0px_24px_rgba(25,28,29,0.04)] border border-surface-container-high col-span-2">
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h3 className="text-xs font-black text-on-surface/50 uppercase tracking-[0.1em]">Activité horaire (Réservations Aujourd'hui)</h3>
+                                    </div>
+                                    <div className="h-[180px]">
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={hourlyData}>
+                                                <XAxis dataKey="name" stroke="#8884d8" fontSize={10} tickLine={false} axisLine={false} />
+                                                <Tooltip cursor={{fill: 'rgba(0,0,0,0.02)'}} contentStyle={{ borderRadius: '16px', border: '1px solid rgba(0,0,0,0.05)', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
+                                                <Bar dataKey="Commandes" fill="#006c4b" radius={[6, 6, 0, 0]} barSize={20}>
+                                                    {hourlyData.map((entry, index) => (
+                                                        <Cell key={`cell-${index}`} fill={entry.name === peakHour ? '#006c4b' : '#006c4b40'} />
+                                                    ))}
+                                                </Bar>
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                </div>
+                                <div className="bg-surface-lowest p-6 rounded-[24px] shadow-[0_0px_24px_rgba(25,28,29,0.04)] border border-surface-container-high flex flex-col justify-between">
+                                    <div>
+                                        <h3 className="text-xs font-black text-on-surface/50 uppercase tracking-[0.1em] mb-4 flex items-center gap-2"><Utensils className="h-4 w-4" /> Top 3 Plats</h3>
+                                        <div className="space-y-3">
+                                            {topItemsData.slice(0, 3).map((item, i) => (
+                                                <div key={i} className="flex justify-between items-center text-sm">
+                                                    <span className="text-on-surface/80 font-medium truncate pr-2 border-b-2 border-primary/20 pb-0.5">{i+1}. {item.name}</span>
+                                                    <span className="font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-lg text-[10px] shrink-0">{item.Quantité}x</span>
+                                                </div>
+                                            ))}
+                                            {topItemsData.length === 0 && <span className="text-[10px] text-on-surface/40 italic uppercase font-bold">Aucune donnée</span>}
+                                        </div>
+                                    </div>
+                                    <div className="mt-4 pt-4 border-t border-surface-container-low flex justify-between items-end">
+                                        <span className="text-[10px] font-black uppercase text-on-surface/40">Heure de pointe</span>
+                                        <span className="text-xl font-black text-primary">{peakHour}</span>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div className="mb-8 flex items-center justify-between">
                                 <h2 className="text-xl font-medium text-on-surface">Clients Actuellement en Ligne</h2>
                                 <div className="flex items-center gap-4">
@@ -1021,13 +1109,6 @@ const Dashboard = () => {
                                         <UserPlus className="h-4 w-4" />
                                         Ajouter un Client
                                     </button>
-                                    <div className="bg-surface-lowest px-4 py-2.5 rounded-xl text-sm font-medium text-on-surface/80 flex items-center gap-2 shadow-[0_0px_16px_rgba(25,28,29,0.02)]">
-                                        <span className="relative flex h-2.5 w-2.5">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-tertiary opacity-75"></span>
-                                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-tertiary"></span>
-                                        </span>
-                                        En direct
-                                    </div>
                                 </div>
                             </div>
 
@@ -1046,7 +1127,7 @@ const Dashboard = () => {
                                             <tr>
                                                 <td colSpan="4" className="px-6 py-16 text-center text-on-surface/40">
                                                     <SignalLow className="h-10 w-10 mx-auto mb-4 opacity-20" />
-                                                    <p className="font-light">Aucun client connectÃ© pour le moment.</p>
+                                                    <p className="font-light">Aucun client connecté pour le moment.</p>
                                                 </td>
                                             </tr>
                                         ) : (
@@ -1089,7 +1170,7 @@ const Dashboard = () => {
                                     </tbody>
                                 </table>
                             </div>
-                        </>
+                        </div>
                     )}
 
                     {activeTab === 'all_clients' && (
