@@ -6,7 +6,7 @@
 const CDN_ENABLED = false; // Disabled at user's request
 const CDN_BASE_URL = 'https://res.cloudinary.com/demo/image/fetch/f_auto,q_auto,w_800/'; // Placeholder CDN
 
-import API_BASE_URL from './config';
+import API_BASE_URL from '../config';
 
 export const transformImageUrl = (url) => {
     if (!url) return url;
